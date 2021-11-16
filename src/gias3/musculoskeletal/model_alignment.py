@@ -18,14 +18,14 @@ import logging
 import numpy
 from scipy.optimize import fmin
 
-from gias2.common import geoprimitives
-from gias2.common import transform3D
-from gias2.learning import PCA_fitting
-from gias2.musculoskeletal import fw_femur_measurements
-from gias2.musculoskeletal import fw_femur_model_data as fmd
-from gias2.musculoskeletal import fw_model_landmarks
-from gias2.registration import alignment_analytic
-from gias2.registration import alignment_fitting
+from gias3.common import geoprimitives
+from gias3.common import transform3D
+from gias3.learning import PCA_fitting
+from gias3.musculoskeletal import fw_femur_measurements
+from gias3.musculoskeletal import fw_femur_model_data as fmd
+from gias3.musculoskeletal import fw_model_landmarks
+from gias3.registration import alignment_analytic
+from gias3.registration import alignment_fitting
 
 log = logging.getLogger(__name__)
 
@@ -45,27 +45,27 @@ def _makeLandmarkObj(targ, evaluator):
 # =======================================================#
 # general alignment                                     #
 # =======================================================#
-def alignMeshParametersRigid(gFields, targetGF=None, retTransforms=False):
+def alignMeshParametersRigid(g_fields, target_gf=None, ret_transforms=False):
     # procrustes alignment of gFields to the 1st gField
 
     # evaluate points from each g
     # d = 5
     # X = [ g.evaluate_geometric_field( d ).T for g in gFields ]
-    XNodes = [g.get_all_point_positions() for g in gFields]
+    XNodes = [g.get_all_point_positions() for g in g_fields]
 
-    if targetGF == None:
+    if target_gf is None:
         # use the first one
-        targetGF = gFields[0]
+        target_gf = g_fields[0]
 
     # targ = targetGF.evaluate_geometric_field( d ).T
-    targNodes = targetGF.get_all_point_positions()
-    targetCoM = targetGF.calc_CoM()
+    targNodes = target_gf.get_all_point_positions()
+    targetCoM = target_gf.calc_CoM()
 
     # rigid fit each to X[targI] 
     alignedParams = []
     Ts = []
-    for i in range(len(gFields)):
-        CoMTrans = targetCoM - gFields[i].calc_CoM()
+    for i in range(len(g_fields)):
+        CoMTrans = targetCoM - g_fields[i].calc_CoM()
         x0 = numpy.hstack([CoMTrans, 0, 0, 0])
         # fit nodes
         tOpt = alignment_fitting.fitRigid(XNodes[i], targNodes, xtol=1e-6, verbose=1)[0]
@@ -73,55 +73,55 @@ def alignMeshParametersRigid(gFields, targetGF=None, retTransforms=False):
         # tOpt = alignment_fitting.fitRigid( X[i], targ, xtol=1e-5, verbose=1 )[0]
 
         # apply transform to gfield parameters
-        gFieldNodes = gFields[i].get_field_parameters().squeeze().T
+        gFieldNodes = g_fields[i].get_field_parameters().squeeze().T
         alignedParams.append(transform3D.transformRigid3DAboutCoM(gFieldNodes, tOpt).T[:, :, numpy.newaxis])
         Ts.append(tOpt)
 
-    if retTransforms:
+    if ret_transforms:
         return alignedParams, Ts
     else:
         return alignedParams
 
 
-def alignMeshParametersProcrustes(gFields, targetGF=None, retTransforms=False):
+def alignMeshParametersProcrustes(g_fields, target_gf=None, ret_transforms=False):
     # procrustes alignment of gFields to the 1st gField
 
     # evaluate points from each g
     # d = 5
     # X = [ g.evaluate_geometric_field( d ).T for g in gFields ]
-    XNodes = [g.get_all_point_positions() for g in gFields]
+    XNodes = [g.get_all_point_positions() for g in g_fields]
 
-    if targetGF == None:
+    if target_gf is None:
         # use the first one
-        targetGF = gFields[0]
+        target_gf = g_fields[0]
 
     # targ = targetGF.evaluate_geometric_field( d ).T
-    targNodes = targetGF.get_all_point_positions()
+    targNodes = target_gf.get_all_point_positions()
 
     # rigid fit each to X[targI] 
     sizes = []
     alignedParams = []
     Ts = []
-    for i in range(len(gFields)):
+    for i in range(len(g_fields)):
         # fit nodes
         tOpt = alignment_fitting.fitRigidScale(XNodes[i], targNodes, xtol=1e-3, verbose=1)[0]
         # fit surface data
         # tOpt = alignment_fitting.fitRigidScale( X[i], targ, xtol=1e-5 )[0]
 
         # apply transform to gfield parameters
-        gFieldNodes = gFields[i].get_field_parameters().squeeze().T
+        gFieldNodes = g_fields[i].get_field_parameters().squeeze().T
         alignedParams.append(transform3D.transformRigidScale3DAboutCoM(gFieldNodes, tOpt).T[:, :, numpy.newaxis])
         sizes.append(tOpt[-1])
         Ts.append(tOpt)
 
-    if retTransforms:
+    if ret_transforms:
         return alignedParams, numpy.array(sizes), Ts
     else:
         return alignedParams, numpy.array(sizes)
 
 
 def alignModelLandmarksLinScale(gf, landmarks, weights=1.0,
-                                GFParamsCallback=None, fminargs=None):
+                                gf_params_callback=None, fminargs=None):
     """
     Rigid transformation plus scaling to register a fieldwork model to its
     landmarks. Registration is performed in two stages: rigid-body, then
@@ -151,7 +151,6 @@ def alignModelLandmarksLinScale(gf, landmarks, weights=1.0,
         The optimal transform vector
     """
 
-    ##############
     if fminargs is None:
         fminargs = {'maxfun': 100000}
 
@@ -195,8 +194,8 @@ def alignModelLandmarksLinScale(gf, landmarks, weights=1.0,
     pT = transform3D.transformRigid3DAboutP(
         p0, xOpt1, CoM0
     ).T[:, :, numpy.newaxis]
-    if GFParamsCallback is not None:
-        GFParamsCallback(pT)
+    if gf_params_callback is not None:
+        gf_params_callback(pT)
     # rigid + isotropic scale
     x02 = numpy.hstack([xOpt1, 1.0])
     xOpt2 = fmin(obj2, x02, **fminargs)
@@ -204,8 +203,8 @@ def alignModelLandmarksLinScale(gf, landmarks, weights=1.0,
     pT = transform3D.transformRigidScale3DAboutP(
         p0, xOpt2, CoM0
     ).T[:, :, numpy.newaxis]
-    if GFParamsCallback is not None:
-        GFParamsCallback(pT)
+    if gf_params_callback is not None:
+        gf_params_callback(pT)
     # rigid + orthogonal scale
     # not implemented
 
@@ -215,7 +214,7 @@ def alignModelLandmarksLinScale(gf, landmarks, weights=1.0,
 
 
 def alignModelLandmarksPC(gf, landmarks, pc, pcs, weights=1.0,
-                          GFParamsCallback=None, mw0=1.0, mwn=1.0, fminargs=None,
+                          gf_params_callback=None, mw0=1.0, mwn=1.0, fminargs=None,
                           ):
     """
     Principal components-based non-linear scaling to register a fieldwork
@@ -255,8 +254,6 @@ def alignModelLandmarksPC(gf, landmarks, pc, pcs, weights=1.0,
     rigidModeNT : 1-d array
         The optimal transform vector
     """
-
-    ##############
     sourceGF = copy.deepcopy(gf)
     targetLandmarks = []
     ldObjs = []
@@ -296,22 +293,22 @@ def alignModelLandmarksPC(gf, landmarks, pc, pcs, weights=1.0,
     rigidT, rigidP = pcFitter.rigidFit(obj, x0=x0)
     sourceGF.set_field_parameters(rigidP.reshape((3, -1, 1)))
     rigidSSE = obj(rigidP)
-    if GFParamsCallback is not None:
-        GFParamsCallback(rigidP)
+    if gf_params_callback is not None:
+        gf_params_callback(rigidP)
 
     rigidMode0T, rigidMode0P = pcFitter.rigidMode0Fit(obj, mWeight=mw0)
     sourceGF.set_field_parameters(rigidMode0P.reshape((3, -1, 1)))
     rigidMode0SSE = obj(rigidMode0P)
-    if GFParamsCallback is not None:
-        GFParamsCallback(rigidMode0P)
+    if gf_params_callback is not None:
+        gf_params_callback(rigidMode0P)
 
     rigidModeNT, rigidModeNP = pcFitter.rigidModeNFit(
         obj, modes=list(range(1, pcs)), mWeight=mwn
     )
     sourceGF.set_field_parameters(rigidModeNP.reshape((3, -1, 1)))
     rigidModeNSSE = obj(rigidModeNP)
-    if GFParamsCallback is not None:
-        GFParamsCallback(rigidModeNP)
+    if gf_params_callback is not None:
+        gf_params_callback(rigidModeNP)
 
     return sourceGF, (rigidSSE, rigidMode0SSE, rigidModeNSSE), rigidModeNT
 
@@ -374,7 +371,7 @@ def createFemurACSOpenSim(head, mc, lc, side='left'):
     return head, x, y, z
 
 
-def alignAnatomicFemur(X, head, mc, lc, returnT=False):
+def alignAnatomicFemur(X, head, mc, lc, return_t=False):
     """ aligns points X, with head CoM, mc CoM, lc CoM, to the origin
     and global axes (femur only). Grood and Suntay 1983 system.
     """
@@ -388,25 +385,26 @@ def alignAnatomicFemur(X, head, mc, lc, returnT=False):
 
     u = numpy.array([o, o + x, o + y, o + z])
 
-    ut = numpy.array([[0, 0, 0], \
-                      [1, 0, 0], \
-                      [0, 1, 0], \
+    ut = numpy.array([[0, 0, 0],
+                      [1, 0, 0],
+                      [0, 1, 0],
                       [0, 0, 1]])
 
     t = transform3D.directAffine(u, ut)
     if t.shape == (3, 4):
         t = numpy.vstack([t, [0, 0, 0, 1]])
 
-    if returnT:
+    if return_t:
         return transform3D.transformAffine(X, t), t
     else:
         return transform3D.transformAffine(X, t)
 
 
-femurLandmarkNodes = {'MEC': 633,
-                      'LEC': 546,
-                      'FGT': 172,
-                      }
+femurLandmarkNodes = {
+    'MEC': 633,
+    'LEC': 546,
+    'FGT': 172,
+}
 
 
 def alignFemurLandmarksRigidScale(gf, landmarks, t0=None, r0=None, s0=None):
@@ -445,14 +443,14 @@ def alignFemurLandmarksRigidScale(gf, landmarks, t0=None, r0=None, s0=None):
         targetLandmarks,
         t0=T0,
         xtol=1e-9,
-        outputErrors=1)
+        output_errors=1)
 
     gf.transformRigidScaleRotateAboutP(TOpt, sourceLandmarks.mean(0))
 
     return gf, (rms0, rmsOpt), TOpt
 
 
-def alignFemurLandmarksPC(gf, pc, landmarks, GFParamsCallback=None, mw0=1.0, mwn=1.0):
+def alignFemurLandmarksPC(gf, pc, landmarks, gf_params_callback=None, mw0=1.0, mwn=1.0):
     """
     landmarks: a list of tuples [(landmark name, landmark coords),...]
     valid landmark names: FHC, MEC, LEC
@@ -503,25 +501,25 @@ def alignFemurLandmarksPC(gf, pc, landmarks, GFParamsCallback=None, mw0=1.0, mwn
     rigidT, rigidP = pcFitter.rigidFit(obj, x0=x0)
     sourceGF.set_field_parameters(rigidP.reshape((3, -1, 1)))
     rigidSSE = obj(rigidP)
-    if GFParamsCallback is not None:
-        GFParamsCallback(rigidP)
+    if gf_params_callback is not None:
+        gf_params_callback(rigidP)
 
-    rigidMode0T, rigidMode0P = pcFitter.rigidMode0Fit(obj, mWeight=mw0)
+    rigidMode0T, rigidMode0P = pcFitter.rigidMode0Fit(obj, m_weight=mw0)
     sourceGF.set_field_parameters(rigidMode0P.reshape((3, -1, 1)))
     rigidMode0SSE = obj(rigidMode0P)
-    if GFParamsCallback is not None:
-        GFParamsCallback(rigidMode0P)
+    if gf_params_callback is not None:
+        gf_params_callback(rigidMode0P)
 
-    rigidModeNT, rigidModeNP = pcFitter.rigidModeNFit(obj, modes=[1, 2], mWeight=mwn)
+    rigidModeNT, rigidModeNP = pcFitter.rigidModeNFit(obj, modes=[1, 2], m_weight=mwn)
     sourceGF.set_field_parameters(rigidModeNP.reshape((3, -1, 1)))
     rigidModeNSSE = obj(rigidModeNP)
-    if GFParamsCallback is not None:
-        GFParamsCallback(rigidModeNP)
+    if gf_params_callback is not None:
+        gf_params_callback(rigidModeNP)
 
     return sourceGF, (rigidSSE, rigidMode0SSE, rigidModeNSSE), rigidModeNT
 
 
-def alignAnatomicFemurOrthoload(X, head, p1, p2, lcdorsal, mcdorsal, returnT=False):
+def alignAnatomicFemurOrthoload(X, head, p1, p2, lcdorsal, mcdorsal, return_t=False):
     """ aligns points X, with head CoM, mc CoM, lc CoM, to the origin
     and global axes (femur only). Grood and Suntay 1983 system.
     """
@@ -535,30 +533,30 @@ def alignAnatomicFemurOrthoload(X, head, p1, p2, lcdorsal, mcdorsal, returnT=Fal
 
     u = numpy.array([o, o + x, o + y, o + z])
 
-    ut = numpy.array([[0, 0, 0], \
-                      [1, 0, 0], \
-                      [0, 1, 0], \
+    ut = numpy.array([[0, 0, 0],
+                      [1, 0, 0],
+                      [0, 1, 0],
                       [0, 0, 1]])
 
     t = transform3D.directAffine(u, ut)
     if t.shape == (3, 4):
         t = numpy.vstack([t, [0, 0, 0, 1]])
 
-    if returnT:
+    if return_t:
         return transform3D.transformAffine(X, t), t
     else:
         return transform3D.transformAffine(X, t)
 
 
-def alignFemurMeshParametersOrtholoadSingle(femurModel):
+def alignFemurMeshParametersOrtholoadSingle(femur_model):
     """ given a femur geometric field, align it geometrically.
     returns the aligned field parameters
     """
 
     # first align to standard ACS
-    femurParamsACS, femurACST = alignFemurMeshParametersAnatomicSingle(femurModel)
-    femurModel.set_field_parameters(femurParamsACS)
-    FM = fw_femur_measurements.FemurMeasurements(femurModel)
+    femurParamsACS, femurACST = alignFemurMeshParametersAnatomicSingle(femur_model)
+    femur_model.set_field_parameters(femurParamsACS)
+    FM = fw_femur_measurements.FemurMeasurements(femur_model)
     FM.calcMeasurements()
 
     o = FM.measurements['head_diameter'].centre
@@ -566,15 +564,15 @@ def alignFemurMeshParametersOrtholoadSingle(femurModel):
     p2 = numpy.array([0, 0, 0])
 
     # condyle dorsal vector
-    lcondX = femurModel.evaluate_geometric_field_in_elements([10, 10],
-                                                             [fmd.assemblyElementsNumbers['lateralcondyle']]).T
-    mcondX = femurModel.evaluate_geometric_field_in_elements([10, 10],
-                                                             [fmd.assemblyElementsNumbers['medialcondyle']]).T
+    lcondX = femur_model.evaluate_geometric_field_in_elements([10, 10],
+                                                              [fmd.assemblyElementsNumbers['lateralcondyle']]).T
+    mcondX = femur_model.evaluate_geometric_field_in_elements([10, 10],
+                                                              [fmd.assemblyElementsNumbers['medialcondyle']]).T
     mcDorsal = mcondX[mcondX[:, 1].argmin()]
     lcDorsal = lcondX[lcondX[:, 1].argmin()]
 
-    alignedParams, T = alignAnatomicFemurOrthoload(femurModel.get_field_parameters().squeeze().T,
-                                                   o, p1, p2, mcDorsal, lcDorsal, returnT=True)
+    alignedParams, T = alignAnatomicFemurOrthoload(femur_model.get_field_parameters().squeeze().T,
+                                                   o, p1, p2, mcDorsal, lcDorsal, return_t=True)
 
     alignedParams = alignedParams.T[:, :, numpy.newaxis]
     return alignedParams, T
@@ -589,7 +587,7 @@ def alignFemurMeshParametersAnatomicSingle(g):
     lc = g.calc_CoM_2D(d, elem=fmd.assemblyElementsNumbers['lateralcondyle'])
     mc = g.calc_CoM_2D(d, elem=fmd.assemblyElementsNumbers['medialcondyle'])
 
-    alignedParams, T = alignAnatomicFemur(g.get_field_parameters().squeeze().T, head, mc, lc, returnT=True)
+    alignedParams, T = alignAnatomicFemur(g.get_field_parameters().squeeze().T, head, mc, lc, return_t=True)
     alignedParams = alignedParams.T[:, :, numpy.newaxis]
     return alignedParams, T
 
@@ -647,7 +645,7 @@ def createPelvisACSAPP(lasis, rasis, lpt, rpt):
     return o, x, y, z
 
 
-def alignAnatomicPelvis(X, lasis, rasis, lpsis, rpsis, returnT=False):
+def alignAnatomicPelvis(X, lasis, rasis, lpsis, rpsis, return_t=False):
     # oa = ( lasis + rasis )/2.0
     # op = ( lpsis + lpsis )/2.0
     # z = normaliseVector( rasis - lasis )
@@ -657,22 +655,22 @@ def alignAnatomicPelvis(X, lasis, rasis, lpsis, rpsis, returnT=False):
     o, x, y, z = createPelvisACSISB(lasis, rasis, lpsis, rpsis)
 
     u = numpy.array([o, o + x, o + y, o + z])
-    ut = numpy.array([[0, 0, 0], \
-                      [1, 0, 0], \
-                      [0, 1, 0], \
+    ut = numpy.array([[0, 0, 0],
+                      [1, 0, 0],
+                      [0, 1, 0],
                       [0, 0, 1]])
 
     t = transform3D.directAffine(u, ut)
     if t.shape == (3, 4):
         t = numpy.vstack([t, [0, 0, 0, 1]])
 
-    if returnT:
+    if return_t:
         return transform3D.transformAffine(X, t), t
     else:
         return transform3D.transformAffine(X, t)
 
 
-def alignAnatomicPelvisAPP(X, lasis, rasis, lpt, rpt, returnT=False):
+def alignAnatomicPelvisAPP(X, lasis, rasis, lpt, rpt, return_t=False):
     """
     Align to the Anterior Pelvic Plane (APP) coordinate system commonly 
     used in hip surgery.
@@ -705,21 +703,21 @@ def alignAnatomicPelvisAPP(X, lasis, rasis, lpt, rpt, returnT=False):
     if t.shape == (3, 4):
         t = numpy.vstack([t, [0, 0, 0, 1]])
 
-    if returnT:
+    if return_t:
         return transform3D.transformAffine(X, t), t
     else:
         return transform3D.transformAffine(X, t)
 
 
-def alignAnatomicLH(X, lasis, lpsis, FHC):
-    y = normaliseVector(lpsis - FHC)
-    x = normaliseVector(numpy.cross(y, lasis - FHC))
+def alignAnatomicLH(X, LASIS, LPSIS, FHC):
+    y = normaliseVector(LPSIS - FHC)
+    x = normaliseVector(numpy.cross(y, LASIS - FHC))
     z = normaliseVector(numpy.cross(x, y))
 
     u = numpy.array([FHC, FHC + x, FHC + y, FHC + z])
-    ut = numpy.array([[0, 0, 0], \
-                      [1, 0, 0], \
-                      [0, 1, 0], \
+    ut = numpy.array([[0, 0, 0],
+                      [1, 0, 0],
+                      [0, 1, 0],
                       [0, 0, 1]])
 
     t = transform3D.directAffine(u, ut)
@@ -734,17 +732,19 @@ def alignAnatomicLH(X, lasis, lpsis, FHC):
 #                     'rpsis':  384,
 #                     }
 
-pelvisLandmarkNodes = {'lasis': fw_model_landmarks._pelvisLASISNode,
-                       'rasis': fw_model_landmarks._pelvisRASISNode,
-                       'lpsis': fw_model_landmarks._pelvisLPSISNode,
-                       'rpsis': fw_model_landmarks._pelvisRPSISNode,
-                       'lpt': fw_model_landmarks._pelvisLPTNode,
-                       'rpt': fw_model_landmarks._pelvisRPTNode,
-                       }
+pelvisLandmarkNodes = {
+    'lasis': fw_model_landmarks._pelvisLASISNode,
+    'rasis': fw_model_landmarks._pelvisRASISNode,
+    'lpsis': fw_model_landmarks._pelvisLPSISNode,
+    'rpsis': fw_model_landmarks._pelvisRPSISNode,
+    'lpt': fw_model_landmarks._pelvisLPTNode,
+    'rpt': fw_model_landmarks._pelvisRPTNode,
+}
 
-LHLandmarkNodes = {'lasis': 466,
-                   'lpsis': 384,
-                   }
+LHLandmarkNodes = {
+    'lasis': 466,
+    'lpsis': 384,
+}
 
 LHAcetabulumElements = [38, 39, 40, 41, 42]
 
@@ -776,7 +776,7 @@ def alignWholePelvisMeshParametersAnatomicSingle(g):
     rpsis = nodeCoords[pelvisLandmarkNodes['rpsis']]
 
     alignedParams, t = alignAnatomicPelvis(g.get_field_parameters().squeeze().T, lasis, rasis, lpsis, rpsis,
-                                           returnT=True)
+                                           return_t=True)
     alignedParams = alignedParams.T[:, :, numpy.newaxis]
 
     return alignedParams, t
@@ -803,7 +803,7 @@ def alignWholePelvisMeshParametersAnatomicAPPSingle(g):
 
     alignedParams, t = alignAnatomicPelvisAPP(g.get_field_parameters().squeeze().T,
                                               lasis, rasis, lpt, rpt,
-                                              returnT=True
+                                              return_t=True
                                               )
     alignedParams = alignedParams.T[:, :, numpy.newaxis]
 
@@ -822,13 +822,11 @@ def alignWholePelvisMeshParametersAnatomicAPP(Gs):
     return alignedParams
 
 
-def alignPelvisLandmarksPC(gf, pc, landmarks, weights=1.0, GFParamsCallback=None, mw0=1.0, mwn=1.0):
+def alignPelvisLandmarksPC(gf, pc, landmarks, weights=1.0, gf_params_callback=None, mw0=1.0, mwn=1.0):
     """
     landmarks: a list of tuples [(landmark name, landmark coords),...]
     valid landmark names: LASIS, RASIS, LPSIS, RPSIS, Sacral, LHJC, RHJC
     """
-
-    ##############
     sourceGF = copy.deepcopy(gf)
     targetLandmarks = []
     ldObjs = []
@@ -858,20 +856,20 @@ def alignPelvisLandmarksPC(gf, pc, landmarks, weights=1.0, GFParamsCallback=None
     rigidT, rigidP = pcFitter.rigidFit(obj, x0=x0)
     sourceGF.set_field_parameters(rigidP.reshape((3, -1, 1)))
     rigidSSE = obj(rigidP)
-    if GFParamsCallback is not None:
-        GFParamsCallback(rigidP)
+    if gf_params_callback is not None:
+        gf_params_callback(rigidP)
 
-    rigidMode0T, rigidMode0P = pcFitter.rigidMode0Fit(obj, mWeight=mw0)
+    rigidMode0T, rigidMode0P = pcFitter.rigidMode0Fit(obj, m_weight=mw0)
     sourceGF.set_field_parameters(rigidMode0P.reshape((3, -1, 1)))
     rigidMode0SSE = obj(rigidMode0P)
-    if GFParamsCallback is not None:
-        GFParamsCallback(rigidMode0P)
+    if gf_params_callback is not None:
+        gf_params_callback(rigidMode0P)
 
-    rigidModeNT, rigidModeNP = pcFitter.rigidModeNFit(obj, modes=[1, 2], mWeight=mwn)
+    rigidModeNT, rigidModeNP = pcFitter.rigidModeNFit(obj, modes=[1, 2], m_weight=mwn)
     sourceGF.set_field_parameters(rigidModeNP.reshape((3, -1, 1)))
     rigidModeNSSE = obj(rigidModeNP)
-    if GFParamsCallback is not None:
-        GFParamsCallback(rigidModeNP)
+    if gf_params_callback is not None:
+        gf_params_callback(rigidModeNP)
 
     return sourceGF, (rigidSSE, rigidMode0SSE, rigidModeNSSE), rigidModeNT
 
@@ -936,7 +934,7 @@ def createTibiaFibulaACSOpenSim(MM, LM, MC, LC, side='left'):
     return IC, x, y, z
 
 
-def alignAnatomicTibiaFibulaGroodSuntay(X, MM, LM, MC, LC, returnT=False):
+def alignAnatomicTibiaFibulaGroodSuntay(X, MM, LM, MC, LC, return_t=False):
     # IC = (MC + LC)/2.0
     # IM = (MM + LM)/2.0
 
@@ -947,27 +945,25 @@ def alignAnatomicTibiaFibulaGroodSuntay(X, MM, LM, MC, LC, returnT=False):
     IC, x, y, z = createTibiaFibulaACSGroodSuntay(MM, LM, MC, LC)
 
     u = numpy.array([IC, IC + x, IC + y, IC + z])
-    ut = numpy.array([[0, 0, 0], \
-                      [1, 0, 0], \
-                      [0, 1, 0], \
+    ut = numpy.array([[0, 0, 0],
+                      [1, 0, 0],
+                      [0, 1, 0],
                       [0, 0, 1]])
 
     t = transform3D.directAffine(u, ut)
     if t.shape == (3, 4):
         t = numpy.vstack([t, [0, 0, 0, 1]])
-    if returnT:
+    if return_t:
         return transform3D.transformAffine(X, t), t
     else:
         return transform3D.transformAffine(X, t)
 
 
-def alignTibiaFibulaLandmarksPC(gf, pc, landmarks, weights=1.0, GFParamsCallback=None, mw0=1.0, mwn=1.0):
+def alignTibiaFibulaLandmarksPC(gf, pc, landmarks, weights=1.0, gf_params_callback=None, mw0=1.0, mwn=1.0):
     """
     landmarks: a list of tuples [(landmark name, landmark coords),...]
     valid landmark names: LM, MM, TT, kneecentre
     """
-
-    ##############
     sourceGF = copy.deepcopy(gf)
     targetLandmarks = []
     ldObjs = []
@@ -997,20 +993,20 @@ def alignTibiaFibulaLandmarksPC(gf, pc, landmarks, weights=1.0, GFParamsCallback
     rigidT, rigidP = pcFitter.rigidFit(obj, x0=x0)
     sourceGF.set_field_parameters(rigidP.reshape((3, -1, 1)))
     rigidSSE = obj(rigidP)
-    if GFParamsCallback is not None:
-        GFParamsCallback(rigidP)
+    if gf_params_callback is not None:
+        gf_params_callback(rigidP)
 
-    rigidMode0T, rigidMode0P = pcFitter.rigidMode0Fit(obj, mWeight=mw0)
+    rigidMode0T, rigidMode0P = pcFitter.rigidMode0Fit(obj, m_weight=mw0)
     sourceGF.set_field_parameters(rigidMode0P.reshape((3, -1, 1)))
     rigidMode0SSE = obj(rigidMode0P)
-    if GFParamsCallback is not None:
-        GFParamsCallback(rigidMode0P)
+    if gf_params_callback is not None:
+        gf_params_callback(rigidMode0P)
 
-    rigidModeNT, rigidModeNP = pcFitter.rigidModeNFit(obj, modes=[1, 2], mWeight=mwn)
+    rigidModeNT, rigidModeNP = pcFitter.rigidModeNFit(obj, modes=[1, 2], m_weight=mwn)
     sourceGF.set_field_parameters(rigidModeNP.reshape((3, -1, 1)))
     rigidModeNSSE = obj(rigidModeNP)
-    if GFParamsCallback is not None:
-        GFParamsCallback(rigidModeNP)
+    if gf_params_callback is not None:
+        gf_params_callback(rigidModeNP)
 
     return sourceGF, (rigidSSE, rigidMode0SSE, rigidModeNSSE), rigidModeNT
 

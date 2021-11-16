@@ -14,7 +14,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import numpy as np
 
-from gias2.musculoskeletal.bonemodels.bonemodels import LowerLimbLeftAtlas, LowerLimbRightAtlas
+from gias3.musculoskeletal.bonemodels.bonemodels import LowerLimbLeftAtlas, LowerLimbRightAtlas
 
 
 def _trim_angle(a):

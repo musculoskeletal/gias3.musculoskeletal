@@ -12,7 +12,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ===============================================================================
 """
 
-from gias2.common import math
+from gias3.common import math
 
 
 class InsufficientLandmarksError(Exception):

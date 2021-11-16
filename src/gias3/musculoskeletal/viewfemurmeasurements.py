@@ -14,15 +14,15 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import numpy
 
-from gias2.fieldwork.field import geometric_field
-from gias2.visualisation import fieldvi
+from gias3.fieldwork.field import geometric_field
+from gias3.visualisation import fieldvi
 
 
-def viewMeasurements(M, G, onCloseCallback=None, F=None):
+def viewMeasurements(M, G, on_close_callback=None, F=None):
     if F is None:
         F = fieldvi.fieldvi()
-        if onCloseCallback == None:
-            F.addOnCloseCallback(onCloseCallback)
+        if on_close_callback is None:
+            F.addOnCloseCallback(on_close_callback)
         F.GFD = [8, 8]
         F.displayGFNodes = False
         F.scene.background = (0, 0, 0)
@@ -41,13 +41,13 @@ def viewMeasurements(M, G, onCloseCallback=None, F=None):
     _drawFemoralAxisLength(F, M)
 
     # draw neck width and tube
-    _drawNeckWidth(F, M, drawTube=False)
+    _drawNeckWidth(F, M, draw_tube=False)
 
     # draw subtrochanteric width
     _drawSubTrochantericWidth(F, M)
 
     # draw midshaft width and tube
-    _drawMidshaftWidth(F, M, drawTube=False)
+    _drawMidshaftWidth(F, M, draw_tube=False)
 
     # draw epicondyle intercepts
     _drawEpicondyleWidth(F, M)
@@ -70,11 +70,11 @@ def viewMeasurements(M, G, onCloseCallback=None, F=None):
     return F
 
 
-def _addText3D(F, name, value, unit, mOrigin, offset):
+def _addText3D(F, name, value, unit, m_origin, offset):
     charWidth = 0.01
     lineWidth = 0.2
-    textOrigin = numpy.array(mOrigin) + numpy.array(offset)
-    textLine = numpy.array([mOrigin, textOrigin]).T
+    textOrigin = numpy.array(m_origin) + numpy.array(offset)
+    textLine = numpy.array([m_origin, textOrigin]).T
     mStr = '{}: {:5.2f} {}'.format(name, value, unit)
     F.scene.mlab.text(textOrigin[0], textOrigin[1], mStr, z=textOrigin[2], width=len(mStr) * charWidth,
                       name='text_' + name)
@@ -100,7 +100,7 @@ def _drawHead(F, M):
     _addText3D(F, 'head diameter', headM.value, 'mm', C, [-50.0, 0, -50])
 
 
-def _drawNeckWidth(F, M, drawTube=False):
+def _drawNeckWidth(F, M, draw_tube=False):
     # width
     NW = M.measurements['neck_width']
     NWC = NW.centre
@@ -117,7 +117,7 @@ def _drawNeckWidth(F, M, drawTube=False):
     _addText3D(F, 'neck width', NW.value, 'mm', NWC, [0.0, 0.0, -100])
 
     # tube
-    if drawTube:
+    if draw_tube:
         neckRadiusM = M.measurements['neck_width']
         # neckEnds = M.neckAxis.eval(numpy.array([-50,10])).T
         # NW = M.measurements['neck_width']
@@ -153,7 +153,7 @@ def _drawSubTrochantericWidth(F, M):
     _addText3D(F, 'subtrochanteric width', sTW.value, 'mm', centre, [-100.0, 0.0, 0.0])
 
 
-def _drawMidshaftWidth(F, M, drawTube=False):
+def _drawMidshaftWidth(F, M, draw_tube=False):
     mSW = M.measurements['midshaft_width']
     points = numpy.array([mSW.p1, mSW.p2]).T
     centre = (mSW.p1 + mSW.p2) * 0.5
@@ -163,7 +163,7 @@ def _drawMidshaftWidth(F, M, drawTube=False):
     _addText3D(F, 'midshaft width', mSW.value, 'mm', centre, [-100.0, 0.0, 0.0])
 
     # draw midshaft tube
-    if drawTube:
+    if draw_tube:
         midshaftEnds = M.shaftAxis.eval(numpy.array([-20, 20])).T
         F.scene.mlab.plot3d(midshaftEnds[0], midshaftEnds[1], midshaftEnds[2], name='glyph_midshaftWidthTube',
                             tube_radius=mSW.value / 2.0, tube_sides=16, color=(0.0, 0.0, 1.0), opacity=0.3)

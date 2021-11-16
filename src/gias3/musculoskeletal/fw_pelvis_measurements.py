@@ -19,11 +19,11 @@ import pickle
 
 import numpy
 
-from gias2.common import geoprimitives as FT
-from gias2.musculoskeletal import fw_model_landmarks as fml
-from gias2.musculoskeletal import fw_pelvis_model_data as pmd
-from gias2.musculoskeletal import model_alignment
-from gias2.musculoskeletal import pelvis_hjc_estimation as HJC
+from gias3.common import geoprimitives as FT
+from gias3.musculoskeletal import fw_model_landmarks as fml
+from gias3.musculoskeletal import fw_pelvis_model_data as pmd
+from gias3.musculoskeletal import model_alignment
+from gias3.musculoskeletal import pelvis_hjc_estimation as HJC
 
 log = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ class PelvisMeasurements(object):
             'inter_PS_distance': None,
         }
 
-        if GF != None:
+        if GF is not None:
             self.GF = copy.deepcopy(GF)
         else:
             self.GF = None
@@ -79,7 +79,7 @@ class PelvisMeasurements(object):
         self.EPACS = None
         self.EPMap = None
 
-        if self.GF != None:
+        if self.GF is not None:
             self._alignToAnatomicCS()
             self._getLandmarks()
 

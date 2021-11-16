@@ -16,12 +16,12 @@ import copy
 
 import numpy
 
-from gias2.common import transform3D
-from gias2.musculoskeletal import fw_femur_measurements
-from gias2.musculoskeletal import fw_femur_model_data as fmd
-from gias2.musculoskeletal import fw_model_landmarks as fml
-from gias2.musculoskeletal import fw_pelvis_measurements
-from gias2.musculoskeletal import model_alignment
+from gias3.common import transform3D
+from gias3.musculoskeletal import fw_femur_measurements
+from gias3.musculoskeletal import fw_femur_model_data as fmd
+from gias3.musculoskeletal import fw_model_landmarks as fml
+from gias3.musculoskeletal import fw_pelvis_measurements
+from gias3.musculoskeletal import model_alignment
 
 
 def normaliseVector(v):
@@ -64,7 +64,7 @@ def calcAngle(v1, v2):
     return numpy.arccos(numpy.dot(v1, v2) / (numpy.linalg.norm(v1) * numpy.linalg.norm(v2)))
 
 
-def alignPelvisRightFemurAnatomic(pelvisG, rightFemurG):
+def alignPelvisRightFemurAnatomic(pelvis_g, right_femur_g):
     """
     aligns meshes of the pelvis and femur to the pelvis
     anatomic coordinate system, and aligns the femur z 
@@ -78,20 +78,20 @@ def alignPelvisRightFemurAnatomic(pelvisG, rightFemurG):
     """
 
     # first transform meshes to pelvis anatomic CS
-    pelvisG = copy.deepcopy(pelvisG)
-    rightFemurG = copy.deepcopy(rightFemurG)
+    pelvis_g = copy.deepcopy(pelvis_g)
+    right_femur_g = copy.deepcopy(right_femur_g)
 
-    pelvisAlignedParams, pelvisAnatAlignT = model_alignment.alignWholePelvisMeshParametersAnatomicSingle(pelvisG)
-    pelvisG.set_field_parameters(pelvisAlignedParams)
+    pelvisAlignedParams, pelvisAnatAlignT = model_alignment.alignWholePelvisMeshParametersAnatomicSingle(pelvis_g)
+    pelvis_g.set_field_parameters(pelvisAlignedParams)
 
-    rightFemurG.transformAffine(pelvisAnatAlignT)
+    right_femur_g.transformAffine(pelvisAnatAlignT)
 
     # calculate femoral head and acetabulum centres 
-    pelvisM = fw_pelvis_measurements.PelvisMeasurements(pelvisG)
+    pelvisM = fw_pelvis_measurements.PelvisMeasurements(pelvis_g)
     pelvisM.calcAcetabulumDiameters()
     rAcetab = pelvisM.measurements['right_acetabulum_diameter']
 
-    femurM = fw_femur_measurements.FemurMeasurements(rightFemurG)
+    femurM = fw_femur_measurements.FemurMeasurements(right_femur_g)
     femurM.calcHeadDiameter()
     rFH = femurM.measurements['head_diameter']
 
@@ -115,9 +115,9 @@ def alignPelvisRightFemurAnatomic(pelvisG, rightFemurG):
 
     # align femur anatomic coord system to global
     d = (10, 10)
-    head = rightFemurG.calc_CoM_2D(d, elem=fmd.assemblyElementsNumbers['head'])
-    lc = rightFemurG.calc_CoM_2D(d, elem=fmd.assemblyElementsNumbers['lateralcondyle'])
-    mc = rightFemurG.calc_CoM_2D(d, elem=fmd.assemblyElementsNumbers['medialcondyle'])
+    head = right_femur_g.calc_CoM_2D(d, elem=fmd.assemblyElementsNumbers['head'])
+    lc = right_femur_g.calc_CoM_2D(d, elem=fmd.assemblyElementsNumbers['lateralcondyle'])
+    mc = right_femur_g.calc_CoM_2D(d, elem=fmd.assemblyElementsNumbers['medialcondyle'])
     oF = (mc + lc) / 2.0
     zF = normaliseVector(head - oF)
     yF = normaliseVector(numpy.cross(zF, (lc - oF)))
@@ -128,14 +128,14 @@ def alignPelvisRightFemurAnatomic(pelvisG, rightFemurG):
     u = numpy.array([oF, oF - yF, oF - zF, oF + xF])
     ut = numpy.array([oF, oF + [1.0, 0, 0], oF + [0, 1.0, 0], oF + [0, 0, 1.0]])
     femurAlignT = transform3D.directAffine(u, ut)
-    rightFemurG.transformAffine(femurAlignT)
+    right_femur_g.transformAffine(femurAlignT)
 
     # check new joint spacing
     # pelvisM2 = fw_pelvis_measurements.PelvisMeasurements(pelvisG)
     # pelvisM2.calcAcetabulumDiameters()
     # rAcetab2 = pelvisM2.measurements['right_acetabulum_diameter']
 
-    femurM2 = fw_femur_measurements.FemurMeasurements(rightFemurG)
+    femurM2 = fw_femur_measurements.FemurMeasurements(right_femur_g)
     femurM2.calcHeadDiameter()
     rFH2 = femurM2.measurements['head_diameter']
     jointSpacing2 = rAcetab.value - rFH2.value
@@ -143,16 +143,16 @@ def alignPelvisRightFemurAnatomic(pelvisG, rightFemurG):
 
     # translate femur to correct for changes in joint spacing
     tCorrect = (rAcetab.centre - rFH2.centre) * (jointSpacing2 - jointSpacing)
-    rightFemurG.transformTranslate(tCorrect)
+    right_femur_g.transformTranslate(tCorrect)
 
-    return pelvisG, rightFemurG
+    return pelvis_g, right_femur_g
 
 
-def _calcFemurZ(femurG):
+def _calcFemurZ(femur_g):
     d = [10, 10]
-    head = femurG.calc_CoM_2D(d, elem=fmd.assemblyElementsNumbers['head'])
-    lc = femurG.calc_CoM_2D(d, elem=fmd.assemblyElementsNumbers['lateralcondyle'])
-    mc = femurG.calc_CoM_2D(d, elem=fmd.assemblyElementsNumbers['medialcondyle'])
+    head = femur_g.calc_CoM_2D(d, elem=fmd.assemblyElementsNumbers['head'])
+    lc = femur_g.calc_CoM_2D(d, elem=fmd.assemblyElementsNumbers['lateralcondyle'])
+    mc = femur_g.calc_CoM_2D(d, elem=fmd.assemblyElementsNumbers['medialcondyle'])
     rFOrigin = (mc + lc) / 2.0
     rFz = normaliseVector(head - rFOrigin)
     if rFz[2] < 0.0:
@@ -161,7 +161,7 @@ def _calcFemurZ(femurG):
     return rFz
 
 
-def alignAnatomicTibiaFibulaGroodSuntay(X, MM, LM, MC, LC, returnT=False):
+def alignAnatomicTibiaFibulaGroodSuntay(X, MM, LM, MC, LC, return_t=False):
     IC = (MC + LC) / 2.0
     IM = (MM + LM) / 2.0
 
@@ -176,7 +176,7 @@ def alignAnatomicTibiaFibulaGroodSuntay(X, MM, LM, MC, LC, returnT=False):
                       [0, 0, 1]])
 
     t = transform3D.directAffine(u, ut)
-    if returnT:
+    if return_t:
         return transform3D.transformAffine(X, t), t
     else:
         return transform3D.transformAffine(X, t)

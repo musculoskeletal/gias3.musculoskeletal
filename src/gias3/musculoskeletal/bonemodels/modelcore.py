@@ -17,10 +17,10 @@ import xml.etree.cElementTree as ET
 import numpy as np
 from numpy.linalg import inv
 
-from gias2.common import transform3D
-from gias2.fieldwork.field import geometric_field
-from gias2.learning import PCA
-from gias2.musculoskeletal import fw_model_landmarks as model_landmarks
+from gias3.common import transform3D
+from gias3.fieldwork.field import geometric_field
+from gias3.learning import PCA
+from gias3.musculoskeletal import fw_model_landmarks as model_landmarks
 
 log = logging.getLogger(__name__)
 
@@ -145,8 +145,8 @@ class DiscretisedRegion(object):
 
 class AttachmentRegion(DiscretisedRegion):
 
-    def __init__(self, name=None, v=None, f=None, matpoints=None, end=None,
-                 number=None):
+    def __init__(self, vertices, faces, name=None, v=None, f=None, matpoints=None, end=None, number=None):
+        super().__init__(vertices, faces)
         self.vertices = v
         if self.vertices is None:
             self.vertices = []
@@ -363,12 +363,13 @@ class BoneModel(object):
 # Multiple bone models                             #
 # ==================================================#
 class MultiBoneAtlas(object):
-    combined_model_field_basis = {'tri10': 'simplex_L3_L3',
-                                  'tri15': 'simplex_L4_L4',
-                                  'quad44': 'quad_L3_L3',
-                                  'quad55': 'quad_L4_L4',
-                                  'quad54': 'quad_L4_L3',
-                                  }
+    combined_model_field_basis = {
+        'tri10': 'simplex_L3_L3',
+        'tri15': 'simplex_L4_L4',
+        'quad44': 'quad_L3_L3',
+        'quad55': 'quad_L4_L4',
+        'quad54': 'quad_L4_L3',
+    }
 
     def __init__(self, name):
         self.name = name

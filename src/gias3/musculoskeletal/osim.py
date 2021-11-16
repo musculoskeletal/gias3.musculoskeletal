@@ -90,16 +90,16 @@ class Body(object):
         v = opensim.Vec3(s[0], s[1], s[2])
         self._osimBody.scale(v)
 
-    def scale(self, scaleFactors, scaleMass=False):
-        v = opensim.Vec3(scaleFactors[0], scaleFactors[1], scaleFactors[2])
-        self._osimBody.scale(v, scaleMass)
+    def scale(self, scale_factors, scale_mass=False):
+        v = opensim.Vec3(scale_factors[0], scale_factors[1], scale_factors[2])
+        self._osimBody.scale(v, scale_mass)
 
-    def scaleInertialProperties(self, scaleFactors, scaleMass=True):
-        v = opensim.Vec3(scaleFactors[0], scaleFactors[1], scaleFactors[2])
-        self._osimBody.scaleInertialProperties(v, scaleMass)
+    def scaleInertialProperties(self, scale_factors, scale_mass=True):
+        v = opensim.Vec3(scale_factors[0], scale_factors[1], scale_factors[2])
+        self._osimBody.scaleInertialProperties(v, scale_mass)
 
-    def scaleMass(self, scaleFactor):
-        self._osimBody.scaleMass(scaleFactor)
+    def scaleMass(self, scale_factor):
+        self._osimBody.scaleMass(scale_factor)
 
     def setDisplayGeometryFileName(self, filenames):
         """
@@ -184,6 +184,7 @@ class PathPoint(object):
         """
         Return the SimmSpline of a given axis (x, y, or z) if self.isMovingPathPoint
         """
+        func = None
         if axis == 'x':
             func = self._osimPathPoint.getXFunction()
         elif axis == 'y':
@@ -396,10 +397,10 @@ class CoordinateSet(object):
         self._cs.setDefaultValue(x)
 
 
-class wrapObject(object):
+class WrapObject(object):
 
-    def __init__(self, WrObj):
-        self._wrapObject = WrObj
+    def __init__(self, wrap_obj):
+        self._wrapObject = wrap_obj
 
     @property
     def name(self):
@@ -420,8 +421,8 @@ class wrapObject(object):
     def getDimensions(self):
         return self._wrapObject.getDimensionsString()
 
-    def scale(self, scaleFactors):
-        v = opensim.Vec3(scaleFactors[0], scaleFactors[1], scaleFactors[2])
+    def scale(self, scale_factors):
+        v = opensim.Vec3(scale_factors[0], scale_factors[1], scale_factors[2])
         self._wrapObject.scale(v)
 
 
@@ -612,17 +613,17 @@ class Joint(object):
 
 class Scale(object):
 
-    def __init__(self, sfactors=None, name=None, segname=None):
+    def __init__(self, scale_factors=None, name=None, segname=None):
 
-        if len(sfactors) != 3:
+        if len(scale_factors) != 3:
             raise (ValueError, 'sfactors must be of length 3')
 
         self._osimScale = opensim.Scale()
-        if sfactors is not None:
+        if scale_factors is not None:
             v = opensim.Vec3(
-                sfactors[0],
-                sfactors[1],
-                sfactors[2],
+                scale_factors[0],
+                scale_factors[1],
+                scale_factors[2],
             )
             self._osimScale.setScaleFactors(v)
         if segname is not None:
@@ -653,11 +654,11 @@ class Scale(object):
         return np.array([v.get(i) for i in range(3)])
 
     @scaleFactors.setter
-    def scaleFactors(self, sfactors):
+    def scaleFactors(self, scale_factors):
         v = opensim.Vec3(
-            sfactors[0],
-            sfactors[1],
-            sfactors[2],
+            scale_factors[0],
+            scale_factors[1],
+            scale_factors[2],
         )
         self._osimScale.setScaleFactors(v)
 
@@ -792,7 +793,7 @@ class Model(object):
             if (wObjects.getSize() != 0):
                 for wi in range(wObjects.getSize()):
                     w = wObjects.get(wi)
-                    self.wrapObjects[w.getName()] = wrapObject(w)
+                    self.wrapObjects[w.getName()] = WrapObject(w)
 
     def init_system(self):
         return self._model.initSystem()

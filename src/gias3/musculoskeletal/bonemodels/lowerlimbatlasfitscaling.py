@@ -18,8 +18,8 @@ import numpy as np
 import sys
 from scipy import optimize
 
-from gias2.musculoskeletal.bonemodels import modelcore
-from gias2.registration import alignment_fitting
+from gias3.musculoskeletal.bonemodels import modelcore
+from gias3.registration import alignment_fitting
 
 log = logging.getLogger(__name__)
 
@@ -146,7 +146,8 @@ def _lower_limb_atlas_landmark_fit_multi_scaling(ll_model, target_landmark_coord
 
 
 def _lower_limb_atlas_landmark_fit_uniform_scaling(ll_model, target_landmark_coords, landmark_names,
-                                                   x0=None, minimise_args={}):
+                                                   x0=None, minimise_args=None):
+    minimise_args = {} if minimise_args is None else minimise_args
     n_models = 1  # this number of scaling factors
     if x0 is not None:
         if len(x0) != (ll_model.N_PARAMS_RIGID + n_models):
@@ -220,18 +221,19 @@ def _lower_limb_atlas_landmark_fit_uniform_scaling(ll_model, target_landmark_coo
     opt_landmark_rmse = np.sqrt((opt_landmark_dist ** 2.0).mean())
 
     # prepare output
-    output_info = {'source_landmark_getter': get_source_landmarks,
-                   'obj': lower_limb_landmark_reg_obj,
-                   'min_results': opt_results,
-                   'opt_source_landmarks': opt_source_landmarks,
-                   }
+    output_info = {
+        'source_landmark_getter': get_source_landmarks,
+        'obj': lower_limb_landmark_reg_obj,
+        'min_results': opt_results,
+        'opt_source_landmarks': opt_source_landmarks,
+    }
 
     return x_history, opt_landmark_dist, opt_landmark_rmse, output_info
 
 
 def fit(ll_model, target_landmark_coords, landmark_names,
         bones_to_scale='uniform', x0=None,
-        minimise_args={}, verbose=False):
+        minimise_args=None, verbose=False):
     """Fit a lower limb atlas model to landmarks. Only rigid body
     transformations and isotropic scaling for each bone..
 
@@ -264,6 +266,7 @@ def fit(ll_model, target_landmark_coords, landmark_names,
             opt_source_landmarks: fitted model landmark coordinates
 
     """
+    minimise_args = {} if minimise_args is None else minimise_args
 
     if len(target_landmark_coords) != len(landmark_names):
         raise ValueError('Number of target landmarks not equal to number of landmark names')
@@ -375,14 +378,12 @@ def fit(ll_model, target_landmark_coords, landmark_names,
 
             if uniform_scale:
                 previous_uniform_scale = True
-                x_hist_it, opt_dist_it, \
-                opt_rmse_it, info_it = _lower_limb_atlas_landmark_fit_uniform_scaling(
+                x_hist_it, opt_dist_it, opt_rmse_it, info_it = _lower_limb_atlas_landmark_fit_uniform_scaling(
                     ll_model, target_landmark_coords, landmark_names,
                     x0=x0, minimise_args=minimise_args[it])
             else:
                 previous_uniform_scale = False
-                x_hist_it, opt_dist_it, \
-                opt_rmse_it, info_it = _lower_limb_atlas_landmark_fit_multi_scaling(
+                x_hist_it, opt_dist_it, opt_rmse_it, info_it = _lower_limb_atlas_landmark_fit_multi_scaling(
                     ll_model, target_landmark_coords, landmark_names,
                     bones_to_scale=bones_to_scale[it],
                     x0=x0, minimise_args=minimise_args[it])

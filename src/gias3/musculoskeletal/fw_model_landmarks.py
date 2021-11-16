@@ -35,8 +35,8 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import numpy as np
 
-from gias2.common import geoprimitives
-from gias2.fieldwork.field import geometric_field
+from gias3.common import geoprimitives
+from gias3.fieldwork.field import geometric_field
 
 # ===========================================================================#
 # femur landmark variables
@@ -93,51 +93,51 @@ def makeEvaluatorFemurHeadCentre(gf, flattened=False, side='left'):
     else:
         headNodes = list(gf.ensemble_field_function.mapper._element_to_ensemble_map[_femurHeadElem].keys())
 
-    def evalFemurHeadCentre(meshParams):
-        return geoprimitives.fitSphereAnalytic(meshParams[:, headNodes].squeeze().T)[0]
+    def evalFemurHeadCentre(mesh_params):
+        return geoprimitives.fitSphereAnalytic(mesh_params[:, headNodes].squeeze().T)[0]
 
     return evalFemurHeadCentre
 
 
 def makeEvaluatorFemurMedialEpicondyle(gf, side='left'):
     if side == 'left':
-        def evalFemurMedialEpicondyle(meshParams):
-            return meshParams[:, _femurMECNode].squeeze()
+        def evalFemurMedialEpicondyle(mesh_params):
+            return mesh_params[:, _femurMECNode].squeeze()
     elif side == 'right':
-        def evalFemurMedialEpicondyle(meshParams):
-            return meshParams[:, _femurRightMECNode].squeeze()
+        def evalFemurMedialEpicondyle(mesh_params):
+            return mesh_params[:, _femurRightMECNode].squeeze()
 
     return evalFemurMedialEpicondyle
 
 
 def makeEvaluatorFemurLateralEpicondyle(gf, side='left'):
     if side == 'left':
-        def evalFemurLateralEpicondyle(meshParams):
-            return meshParams[:, _femurLECNode].squeeze()
+        def evalFemurLateralEpicondyle(mesh_params):
+            return mesh_params[:, _femurLECNode].squeeze()
     elif side == 'right':
-        def evalFemurLateralEpicondyle(meshParams):
-            return meshParams[:, _femurRightLECNode].squeeze()
+        def evalFemurLateralEpicondyle(mesh_params):
+            return mesh_params[:, _femurRightLECNode].squeeze()
     return evalFemurLateralEpicondyle
 
 
 def makeEvaluatorFemurGreaterTrochanter(gf, side='left'):
     if side == 'left':
-        def evalFemurGreaterTrochanter(meshParams):
-            return meshParams[:, _femurGTNode].squeeze()
+        def evalFemurGreaterTrochanter(mesh_params):
+            return mesh_params[:, _femurGTNode].squeeze()
     elif side == 'right':
-        def evalFemurGreaterTrochanter(meshParams):
-            return meshParams[:, _femurRightGTNode].squeeze()
+        def evalFemurGreaterTrochanter(mesh_params):
+            return mesh_params[:, _femurRightGTNode].squeeze()
 
     return evalFemurGreaterTrochanter
 
 
 def makeEvaluatorFemurLesserTrochanter(gf, side='left'):
     if side == 'left':
-        def evalFemurLesserTrochanter(meshParams):
-            return meshParams[:, _femurLTNode].squeeze()
+        def evalFemurLesserTrochanter(mesh_params):
+            return mesh_params[:, _femurLTNode].squeeze()
     elif side == 'right':
-        def evalFemurLesserTrochanter(meshParams):
-            return meshParams[:, _femurRightLTNode].squeeze()
+        def evalFemurLesserTrochanter(mesh_params):
+            return mesh_params[:, _femurRightLTNode].squeeze()
 
     return evalFemurLesserTrochanter
 
@@ -146,9 +146,9 @@ def makeEvaluatorFemurKneeCentre(gf, side='left'):
     evalMC = makeEvaluatorFemurMedialEpicondyle(gf, side=side)
     evalLC = makeEvaluatorFemurLateralEpicondyle(gf, side=side)
 
-    def evalFemurKneeCentre(meshParams):
-        mc = evalMC(meshParams)
-        lc = evalLC(meshParams)
+    def evalFemurKneeCentre(mesh_params):
+        mc = evalMC(mesh_params)
+        lc = evalLC(mesh_params)
         return (mc + lc) * 0.5
 
     return evalFemurKneeCentre
@@ -179,79 +179,79 @@ def makeEvaluatorHemiPelvisAcetabularCentre(gf):
     for e in _hemiPelvisAcetabulumElements:
         acNodes.extend(list(m[e].keys()))
 
-    def evalAcetabularCentre(meshParams):
-        return geoprimitives.fitSphereAnalytic(meshParams[:, acNodes].squeeze().T)[0]
+    def evalAcetabularCentre(mesh_params):
+        return geoprimitives.fitSphereAnalytic(mesh_params[:, acNodes].squeeze().T)[0]
 
     return evalAcetabularCentre
 
 
 def makeEvaluatorHemiPelvisASIS(gf, side='left'):
     if side == 'left':
-        def evalHemiPelvisASIS(meshParams):
-            return meshParams[:, _hemiPelvisASISNode].squeeze()
+        def evalHemiPelvisASIS(mesh_params):
+            return mesh_params[:, _hemiPelvisASISNode].squeeze()
     elif side == 'right':
-        def evalHemiPelvisASIS(meshParams):
-            return meshParams[:, _hemiPelvisRightASISNode].squeeze()
+        def evalHemiPelvisASIS(mesh_params):
+            return mesh_params[:, _hemiPelvisRightASISNode].squeeze()
     return evalHemiPelvisASIS
 
 
 def makeEvaluatorHemiPelvisPSIS(gf, side='left'):
     if side == 'left':
-        def evalHemiPelvisPSIS(meshParams):
-            return meshParams[:, _hemiPelvisPSISNode].squeeze()
+        def evalHemiPelvisPSIS(mesh_params):
+            return mesh_params[:, _hemiPelvisPSISNode].squeeze()
     elif side == 'right':
-        def evalHemiPelvisPSIS(meshParams):
-            return meshParams[:, _hemiPelvisRightPSISNode].squeeze()
+        def evalHemiPelvisPSIS(mesh_params):
+            return mesh_params[:, _hemiPelvisRightPSISNode].squeeze()
     return evalHemiPelvisPSIS
 
 
 def makeEvaluatorHemiPelvisPubisSymphysis(gf, side='left'):
     if side == 'left':
-        def evalHemiPelvisPubisSymphysis(meshParams):
-            return meshParams[:, _hemiPelvisPSNode].squeeze()
+        def evalHemiPelvisPubisSymphysis(mesh_params):
+            return mesh_params[:, _hemiPelvisPSNode].squeeze()
     elif side == 'right':
-        def evalHemiPelvisPubisSymphysis(meshParams):
-            return meshParams[:, _hemiPelvisRightPSNode].squeeze()
+        def evalHemiPelvisPubisSymphysis(mesh_params):
+            return mesh_params[:, _hemiPelvisRightPSNode].squeeze()
     return evalHemiPelvisPubisSymphysis
 
 
 def makeEvaluatorHemiPelvisPubisTubercle(gf, side='left'):
     if side == 'left':
-        def evalHemiPelvisPubisTubercle(meshParams):
-            return meshParams[:, _hemiPelvisPTNode].squeeze()
+        def evalHemiPelvisPubisTubercle(mesh_params):
+            return mesh_params[:, _hemiPelvisPTNode].squeeze()
     elif side == 'right':
-        def evalHemiPelvisPubisTubercle(meshParams):
-            return meshParams[:, _hemiPelvisRightPTNode].squeeze()
+        def evalHemiPelvisPubisTubercle(mesh_params):
+            return mesh_params[:, _hemiPelvisRightPTNode].squeeze()
     return evalHemiPelvisPubisTubercle
 
 
 def makeEvaluatorHemiPelvisIlialSpine(gf, side='left'):
     if side == 'left':
-        def evalHemiPelvisIlialSpine(meshParams):
-            return meshParams[:, _hemiPelvisISNode].squeeze()
+        def evalHemiPelvisIlialSpine(mesh_params):
+            return mesh_params[:, _hemiPelvisISNode].squeeze()
     elif side == 'right':
-        def evalHemiPelvisIlialSpine(meshParams):
-            return meshParams[:, _hemiPelvisRightISNode].squeeze()
+        def evalHemiPelvisIlialSpine(mesh_params):
+            return mesh_params[:, _hemiPelvisRightISNode].squeeze()
     return evalHemiPelvisIlialSpine
 
 
 def makeEvaluatorHemiPelvisIschialTuberosity(gf, side='left'):
     if side == 'left':
-        def evalHemiPelvisIschialTuberosity(meshParams):
-            return meshParams[:, _hemiPelvisITNode].squeeze()
+        def evalHemiPelvisIschialTuberosity(mesh_params):
+            return mesh_params[:, _hemiPelvisITNode].squeeze()
     elif side == 'right':
-        def evalHemiPelvisIschialTuberosity(meshParams):
-            return meshParams[:, _hemiPelvisRightITNode].squeeze()
+        def evalHemiPelvisIschialTuberosity(mesh_params):
+            return mesh_params[:, _hemiPelvisRightITNode].squeeze()
     return evalHemiPelvisIschialTuberosity
 
 
 def makeEvaluatorHemiPelvisAcetabularNotch(gf, side='left'):
     if side == 'left':
-        def evalHemiPelvisAcetabularNotch(meshParams):
-            return meshParams[:, _hemiPelvisANNode].squeeze()
+        def evalHemiPelvisAcetabularNotch(mesh_params):
+            return mesh_params[:, _hemiPelvisANNode].squeeze()
     elif side == 'right':
-        def evalHemiPelvisAcetabularNotch(meshParams):
-            return meshParams[:, _hemiPelvisRightANNode].squeeze()
+        def evalHemiPelvisAcetabularNotch(mesh_params):
+            return mesh_params[:, _hemiPelvisRightANNode].squeeze()
     return evalHemiPelvisAcetabularNotch
 
 
@@ -278,92 +278,92 @@ _pelvisSacElems = list(range(146, 260))
 
 
 def makeEvaluatorPelvisLASIS(gf, **kwargs):
-    def evalPelvisLASIS(meshParams):
-        return meshParams[:, _pelvisLASISNode].squeeze()
+    def evalPelvisLASIS(mesh_params):
+        return mesh_params[:, _pelvisLASISNode].squeeze()
 
     return evalPelvisLASIS
 
 
 def makeEvaluatorPelvisRASIS(gf, **kwargs):
-    def evalPelvisRASIS(meshParams):
-        return meshParams[:, _pelvisRASISNode].squeeze()
+    def evalPelvisRASIS(mesh_params):
+        return mesh_params[:, _pelvisRASISNode].squeeze()
 
     return evalPelvisRASIS
 
 
 def makeEvaluatorPelvisLPSIS(gf, **kwargs):
-    def evalPelvisLPSIS(meshParams):
-        return meshParams[:, _pelvisLPSISNode].squeeze()
+    def evalPelvisLPSIS(mesh_params):
+        return mesh_params[:, _pelvisLPSISNode].squeeze()
 
     return evalPelvisLPSIS
 
 
 def makeEvaluatorPelvisRPSIS(gf, **kwargs):
-    def evalPelvisRPSIS(meshParams):
-        return meshParams[:, _pelvisRPSISNode].squeeze()
+    def evalPelvisRPSIS(mesh_params):
+        return mesh_params[:, _pelvisRPSISNode].squeeze()
 
     return evalPelvisRPSIS
 
 
 def makeEvaluatorPelvisLPT(gf, **kwargs):
-    def evalPelvisLPT(meshParams):
-        return meshParams[:, _pelvisLPTNode].squeeze()
+    def evalPelvisLPT(mesh_params):
+        return mesh_params[:, _pelvisLPTNode].squeeze()
 
     return evalPelvisLPT
 
 
 def makeEvaluatorPelvisRPT(gf, **kwargs):
-    def evalPelvisRPT(meshParams):
-        return meshParams[:, _pelvisRPTNode].squeeze()
+    def evalPelvisRPT(mesh_params):
+        return mesh_params[:, _pelvisRPTNode].squeeze()
 
     return evalPelvisRPT
 
 
 def makeEvaluatorPelvisLPS(gf, **kwargs):
-    def evalPelvisLPS(meshParams):
-        return meshParams[:, _pelvisLPSNode].squeeze()
+    def evalPelvisLPS(mesh_params):
+        return mesh_params[:, _pelvisLPSNode].squeeze()
 
     return evalPelvisLPS
 
 
 def makeEvaluatorPelvisRPS(gf, **kwargs):
-    def evalPelvisRPS(meshParams):
-        return meshParams[:, _pelvisRPSNode].squeeze()
+    def evalPelvisRPS(mesh_params):
+        return mesh_params[:, _pelvisRPSNode].squeeze()
 
     return evalPelvisRPS
 
 
 def makeEvaluatorPelvisLIS(gf, **kwargs):
-    def evalPelvisLIS(meshParams):
-        return meshParams[:, _pelvisLISNode].squeeze()
+    def evalPelvisLIS(mesh_params):
+        return mesh_params[:, _pelvisLISNode].squeeze()
 
     return evalPelvisLIS
 
 
 def makeEvaluatorPelvisRIS(gf, **kwargs):
-    def evalPelvisRIS(meshParams):
-        return meshParams[:, _pelvisRISNode].squeeze()
+    def evalPelvisRIS(mesh_params):
+        return mesh_params[:, _pelvisRISNode].squeeze()
 
     return evalPelvisRIS
 
 
 def makeEvaluatorPelvisLIT(gf, **kwargs):
-    def evalPelvisLIT(meshParams):
-        return meshParams[:, _pelvisLITNode].squeeze()
+    def evalPelvisLIT(mesh_params):
+        return mesh_params[:, _pelvisLITNode].squeeze()
 
     return evalPelvisLIT
 
 
 def makeEvaluatorPelvisRIT(gf, **kwargs):
-    def evalPelvisRIT(meshParams):
-        return meshParams[:, _pelvisRITNode].squeeze()
+    def evalPelvisRIT(mesh_params):
+        return mesh_params[:, _pelvisRITNode].squeeze()
 
     return evalPelvisRIT
 
 
 def makeEvaluatorPelvisSacPlat(gf, **kwargs):
-    def evalPelvisSacPlat(meshParams):
-        return meshParams[:, _pelvisSacPlatNode].squeeze()
+    def evalPelvisSacPlat(mesh_params):
+        return mesh_params[:, _pelvisSacPlatNode].squeeze()
 
     return evalPelvisSacPlat
 
@@ -372,9 +372,9 @@ def makeEvaluatorPelvisSacral(gf, **kwargs):
     """Mid-point of PSISes
     """
 
-    def evalPelvisSacral(meshParams):
-        s = 0.5 * (meshParams[:, _pelvisLPSISNode].squeeze() +
-                   meshParams[:, _pelvisRPSISNode].squeeze()
+    def evalPelvisSacral(mesh_params):
+        s = 0.5 * (mesh_params[:, _pelvisLPSISNode].squeeze() +
+                   mesh_params[:, _pelvisRPSISNode].squeeze()
                    )
         return s
 
@@ -387,12 +387,12 @@ def makeEvaluatorPelvisLHJC(gf, disc=5.0, radius=False, side=None):
         gf, _pelvisLHJCElems, disc
     )
     if radius:
-        def evalPelvisLHJC(meshParams):
-            acetabPoints = acetabElemEval(meshParams).T
+        def evalPelvisLHJC(mesh_params):
+            acetabPoints = acetabElemEval(mesh_params).T
             return geoprimitives.fitSphereAnalytic(acetabPoints)
     else:
-        def evalPelvisLHJC(meshParams):
-            acetabPoints = acetabElemEval(meshParams).T
+        def evalPelvisLHJC(mesh_params):
+            acetabPoints = acetabElemEval(mesh_params).T
             return geoprimitives.fitSphereAnalytic(acetabPoints)[0]
     return evalPelvisLHJC
 
@@ -403,12 +403,12 @@ def makeEvaluatorPelvisRHJC(gf, disc=5.0, radius=False, side=None):
         gf, _pelvisRHJCElems, disc
     )
     if radius:
-        def evalPelvisRHJC(meshParams):
-            acetabPoints = acetabElemEval(meshParams).T
+        def evalPelvisRHJC(mesh_params):
+            acetabPoints = acetabElemEval(mesh_params).T
             return geoprimitives.fitSphereAnalytic(acetabPoints)
     else:
-        def evalPelvisRHJC(meshParams):
-            acetabPoints = acetabElemEval(meshParams).T
+        def evalPelvisRHJC(mesh_params):
+            acetabPoints = acetabElemEval(mesh_params).T
             return geoprimitives.fitSphereAnalytic(acetabPoints)[0]
     return evalPelvisRHJC
 
@@ -435,51 +435,51 @@ _fibulaElements = list(range(46, 88))
 
 def makeEvaluatorTibiaFibulaLC(gf, side='left'):
     if side == 'left':
-        def evalTibiaFibulaLC(meshParams):
-            return meshParams[:, _tibiaFibulaLCNode].squeeze()
+        def evalTibiaFibulaLC(mesh_params):
+            return mesh_params[:, _tibiaFibulaLCNode].squeeze()
     elif side == 'right':
-        def evalTibiaFibulaLC(meshParams):
-            return meshParams[:, _tibiaFibulaRightLCNode].squeeze()
+        def evalTibiaFibulaLC(mesh_params):
+            return mesh_params[:, _tibiaFibulaRightLCNode].squeeze()
     return evalTibiaFibulaLC
 
 
 def makeEvaluatorTibiaFibulaMC(gf, side='left'):
     if side == 'left':
-        def evalTibiaFibulaMC(meshParams):
-            return meshParams[:, _tibiaFibulaMCNode].squeeze()
+        def evalTibiaFibulaMC(mesh_params):
+            return mesh_params[:, _tibiaFibulaMCNode].squeeze()
     elif side == 'right':
-        def evalTibiaFibulaMC(meshParams):
-            return meshParams[:, _tibiaFibulaRightMCNode].squeeze()
+        def evalTibiaFibulaMC(mesh_params):
+            return mesh_params[:, _tibiaFibulaRightMCNode].squeeze()
     return evalTibiaFibulaMC
 
 
 def makeEvaluatorTibiaFibulaMM(gf, side='left'):
     if side == 'left':
-        def evalTibiaFibulaMM(meshParams):
-            return meshParams[:, _tibiaFibulaMMNode].squeeze()
+        def evalTibiaFibulaMM(mesh_params):
+            return mesh_params[:, _tibiaFibulaMMNode].squeeze()
     elif side == 'right':
-        def evalTibiaFibulaMM(meshParams):
-            return meshParams[:, _tibiaFibulaRightMMNode].squeeze()
+        def evalTibiaFibulaMM(mesh_params):
+            return mesh_params[:, _tibiaFibulaRightMMNode].squeeze()
     return evalTibiaFibulaMM
 
 
 def makeEvaluatorTibiaFibulaLM(gf, side='left'):
     if side == 'left':
-        def evalTibiaFibulaLM(meshParams):
-            return meshParams[:, _tibiaFibulaLMNode].squeeze()
+        def evalTibiaFibulaLM(mesh_params):
+            return mesh_params[:, _tibiaFibulaLMNode].squeeze()
     elif side == 'right':
-        def evalTibiaFibulaLM(meshParams):
-            return meshParams[:, _tibiaFibulaRightLMNode].squeeze()
+        def evalTibiaFibulaLM(mesh_params):
+            return mesh_params[:, _tibiaFibulaRightLMNode].squeeze()
     return evalTibiaFibulaLM
 
 
 def makeEvaluatorTibiaFibulaTT(gf, side='left'):
     if side == 'left':
-        def evalTibiaFibulaTT(meshParams):
-            return meshParams[:, _tibiaFibulaTTNode].squeeze()
+        def evalTibiaFibulaTT(mesh_params):
+            return mesh_params[:, _tibiaFibulaTTNode].squeeze()
     elif side == 'right':
-        def evalTibiaFibulaTT(meshParams):
-            return meshParams[:, _tibiaFibulaRightTTNode].squeeze()
+        def evalTibiaFibulaTT(mesh_params):
+            return mesh_params[:, _tibiaFibulaRightTTNode].squeeze()
     return evalTibiaFibulaTT
 
 
@@ -489,11 +489,11 @@ def makeEvaluatorTibiaFibulaKneeCentre(gf, side='left'):
     evalLM = makeEvaluatorTibiaFibulaLM(gf, side=side)
     evalMM = makeEvaluatorTibiaFibulaMM(gf, side=side)
 
-    def evalTibiaFibulaKneeCentre(meshParams):
-        lc = evalLC(meshParams)
-        mc = evalMC(meshParams)
-        lm = evalLM(meshParams)
-        mm = evalMM(meshParams)
+    def evalTibiaFibulaKneeCentre(mesh_params):
+        lc = evalLC(mesh_params)
+        mc = evalMC(mesh_params)
+        lm = evalLM(mesh_params)
+        mm = evalMM(mesh_params)
 
         # calc tibfib ACS
         ic = (mc + lc) / 2.0
@@ -524,31 +524,31 @@ _patellaRightLatNode = 72
 
 def makeEvaluatorPatellaInf(gf, side='left'):
     if side == 'left':
-        def evalPatellaInf(meshParams):
-            return meshParams[:, _patellaInfNode].squeeze()
+        def evalPatellaInf(mesh_params):
+            return mesh_params[:, _patellaInfNode].squeeze()
     elif side == 'right':
-        def evalPatellaInf(meshParams):
-            return meshParams[:, _patellaRightInfNode].squeeze()
+        def evalPatellaInf(mesh_params):
+            return mesh_params[:, _patellaRightInfNode].squeeze()
     return evalPatellaInf
 
 
 def makeEvaluatorPatellaSup(gf, side='left'):
     if side == 'left':
-        def evalPatellaSup(meshParams):
-            return meshParams[:, _patellaSupNode].squeeze()
+        def evalPatellaSup(mesh_params):
+            return mesh_params[:, _patellaSupNode].squeeze()
     elif side == 'right':
-        def evalPatellaSup(meshParams):
-            return meshParams[:, _patellaRightSupNode].squeeze()
+        def evalPatellaSup(mesh_params):
+            return mesh_params[:, _patellaRightSupNode].squeeze()
     return evalPatellaSup
 
 
 def makeEvaluatorPatellaLat(gf, side='left'):
     if side == 'left':
-        def evalPatellaLat(meshParams):
-            return meshParams[:, _patellaLatNode].squeeze()
+        def evalPatellaLat(mesh_params):
+            return mesh_params[:, _patellaLatNode].squeeze()
     elif side == 'right':
-        def evalPatellaLat(meshParams):
-            return meshParams[:, _patellaRightLatNode].squeeze()
+        def evalPatellaLat(mesh_params):
+            return mesh_params[:, _patellaRightLatNode].squeeze()
     return evalPatellaLat
 
 

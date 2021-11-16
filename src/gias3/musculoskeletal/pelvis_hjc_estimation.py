@@ -82,16 +82,16 @@ def calcEucDist(X, Y):
     return np.sqrt((np.subtract(X, Y) ** 2.0).sum(1))
 
 
-def HJCTylkowski(LASIS, RASIS, popClass):
+def HJCTylkowski(LASIS, RASIS, pop_class):
     """
     Tylkowski's (1982) method predicts the HJC as a point distal, medial,
     and posterior to the ASIS. The distance distal (rd), medial (rm), and 
     posterior (rp) are proportions of the ASIS-ASIS distance of the pelvis.
     """
 
-    rd = _literatureData['Tylkowski'][popClass]['rd']
-    rm = _literatureData['Tylkowski'][popClass]['rm']
-    rp = _literatureData['Tylkowski'][popClass]['rp']
+    rd = _literatureData['Tylkowski'][pop_class]['rd']
+    rm = _literatureData['Tylkowski'][pop_class]['rm']
+    rp = _literatureData['Tylkowski'][pop_class]['rp']
 
     D = np.sqrt(((LASIS - RASIS) ** 2.0).sum())
     LHJC = LASIS + [-rp * D, -rd * D, rm * D]
@@ -111,15 +111,15 @@ def HJCTylkowskiInverse(LASIS, RASIS, LHJC, RHJC):
     return LCoeffs, RCoeffs
 
 
-def HJCAndriacchi(LASIS, RASIS, PS, popClass):
+def HJCAndriacchi(LASIS, RASIS, PS, pop_class):
     """
     Andriacchi's (1982) method predicts the HJC as a point distal and lateral
     of the midpoint of a line between the ASIS and the pubis symphysis. This 
     distances distal (dd) and medial (dm) are defined in absolute values.
     """
 
-    dd = _literatureData['Andriacchi'][popClass]['dd']
-    dl = _literatureData['Andriacchi'][popClass]['dl']
+    dd = _literatureData['Andriacchi'][pop_class]['dd']
+    dl = _literatureData['Andriacchi'][pop_class]['dl']
 
     LO = (LASIS + PS) / 2.0
     RO = (RASIS + PS) / 2.0
@@ -141,14 +141,14 @@ def HJCAndriacchiInverse(LASIS, RASIS, PS, LHJC, RHJC):
     return LConst, RConst
 
 
-def HJCBell(LASIS, RASIS, PS, popClass):
+def HJCBell(LASIS, RASIS, PS, pop_class):
     """
     Bell's (1989) method uses Andriacchi's method to predict frontal plane 
     position, and Tylkowski's method to predict antero-posterior position
     """
 
-    LHJC_A, RHJC_A, LO, RO = HJCAndriacchi(LASIS, RASIS, PS, popClass)
-    LHJC_T, RHJC_T, D = HJCTylkowski(LASIS, RASIS, popClass)
+    LHJC_A, RHJC_A, LO, RO = HJCAndriacchi(LASIS, RASIS, PS, pop_class)
+    LHJC_T, RHJC_T, D = HJCTylkowski(LASIS, RASIS, pop_class)
 
     LHJC = np.array([LHJC_T[0], LHJC_A[1], LHJC_A[2]])
     RHJC = np.array([RHJC_T[0], RHJC_A[1], RHJC_A[2]])
@@ -156,7 +156,7 @@ def HJCBell(LASIS, RASIS, PS, popClass):
     return LHJC, RHJC, D, LO, RO
 
 
-def HJCSeidel(LASIS, RASIS, LPSIS, RPSIS, PS, popClass):
+def HJCSeidel(LASIS, RASIS, LPSIS, RPSIS, PS, pop_class):
     """
     Seidel's (1995) method predicts HJC as proportions of hip 
     width (ASIS to ASSIS), height (ASIS-ASIS to PS), and 
@@ -171,9 +171,9 @@ def HJCSeidel(LASIS, RASIS, LPSIS, RPSIS, PS, popClass):
     DR = abs(RASIS[0] - RPSIS[0])
     D = (DL + DR) / 2.0
 
-    rd = _literatureData['Seidel'][popClass]['rd']
-    rm = _literatureData['Seidel'][popClass]['rm']
-    rp = _literatureData['Seidel'][popClass]['rp']
+    rd = _literatureData['Seidel'][pop_class]['rd']
+    rm = _literatureData['Seidel'][pop_class]['rm']
+    rp = _literatureData['Seidel'][pop_class]['rp']
 
     LHJC = LASIS + [-rp * D, -rd * H, rm * W]
     RHJC = RASIS + [-rp * D, -rd * H, -rm * W]
@@ -189,7 +189,7 @@ def HJCSeidelInverse(LASIS, RASIS, PS, H, D, LHJC, RHJC):
     return LCoeffs, RCoeffs
 
 
-def HJCHarrington(LASIS, RASIS, LPSIS, RPSIS, popClass):
+def HJCHarrington(LASIS, RASIS, LPSIS, RPSIS, pop_class):
     """ Harrington (2007) method for predicting right HJC from 
     pelvic depth (PD), and pelvis width (PW) in absolute
     value with the pelvis in the ISB anatomical coordinate system.
@@ -204,12 +204,12 @@ def HJCHarrington(LASIS, RASIS, LPSIS, RPSIS, popClass):
     PD = np.sqrt(((AC - PC) ** 2.0).sum())
 
     # get regression coeffs and constants
-    pdx = _literatureData['Harrington'][popClass]['pdx']
-    cx = _literatureData['Harrington'][popClass]['cx']
-    pwy = _literatureData['Harrington'][popClass]['pwy']
-    cy = _literatureData['Harrington'][popClass]['cy']
-    pwz = _literatureData['Harrington'][popClass]['pwz']
-    cz = _literatureData['Harrington'][popClass]['cz']
+    pdx = _literatureData['Harrington'][pop_class]['pdx']
+    cx = _literatureData['Harrington'][pop_class]['cx']
+    pwy = _literatureData['Harrington'][pop_class]['pwy']
+    cy = _literatureData['Harrington'][pop_class]['cy']
+    pwz = _literatureData['Harrington'][pop_class]['pwz']
+    cz = _literatureData['Harrington'][pop_class]['cz']
 
     # calculate HJC
     RHJC = np.array([
