@@ -1,7 +1,7 @@
 """
 FILE: viewfemurmeasurements.py
 LAST MODIFIED: 24-12-2015 
-DESCRIPTION: function to render femur measurements in a Fieldvi instance.
+DESCRIPTION: function to render femur measurements in a FieldVi instance.
 
 ===============================================================================
 This file is part of GIAS2. (https://bitbucket.org/jangle/gias2)

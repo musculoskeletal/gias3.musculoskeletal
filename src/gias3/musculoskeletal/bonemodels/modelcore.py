@@ -400,7 +400,7 @@ class MultiBoneAtlas(object):
         if combined_mesh_name is None:
             combined_mesh_name = self.name
 
-        self.combined_model_gf = geometric_field.geometric_field(
+        self.combined_model_gf = geometric_field.GeometricField(
             combined_gf_name, 3, field_dimensions=2,
             field_basis=self.combined_model_field_basis
         )
