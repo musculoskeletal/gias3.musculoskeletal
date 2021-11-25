@@ -43,11 +43,11 @@ class _Plane3D(object):
     """
 
     def __init__(self, abcd=None, NP=None):
-        if abcd != None:
+        if abcd is not None:
             self.a, self.b, self.c, self.d = abcd
             self.N = np.array([self.a, self.b, self.c])
             self.P = None
-        if NP != None:
+        if NP is not None:
             self.N, self.P = NP
             self.a, self.b, self.c = self.N
             self.d = -self.a * self.P[0] - self.b * self.P[1] - self.c * self.P[2]
@@ -173,7 +173,7 @@ class FemurMeasurements(object):
             self.neckAxis = FT.Line3D(self.measurements['neck_axis'].value[0],
                                       self.measurements['neck_axis'].value[1])
 
-        # ~ if self.measurements['epicondylar_axis'] != None:
+        # ~ if self.measurements['epicondylar_axis'] is not None:
         # ~ self.neckAxis = FT.Line3D(self.measurements['epicondylar_axis'].value[0],
         # ~ self.measurements['epicondylar_axis'].value[1])
 
