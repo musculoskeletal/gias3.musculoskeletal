@@ -40,8 +40,8 @@ def _make_x0(ll, npcs, landmark_names, target_landmarks, source_landmarks, init_
             targ_rpsis = target_landmarks[landmark_names.index('pelvis-RPSIS')]
             targ_sac = (np.array(targ_lpsis) + np.array(targ_rpsis)) * 0.5
             target_landmarks = np.vstack([target_landmarks, targ_sac])
-            src_lpsis = target_landmarks[landmark_names.index('pelvis-LPSIS')]
-            src_rpsis = target_landmarks[landmark_names.index('pelvis-RPSIS')]
+            src_lpsis = source_landmarks[landmark_names.index('pelvis-LPSIS')]
+            src_rpsis = source_landmarks[landmark_names.index('pelvis-RPSIS')]
             src_sac = (np.array(src_lpsis) + np.array(src_rpsis)) * 0.5
             source_landmarks = np.vstack([source_landmarks, src_sac])
 
