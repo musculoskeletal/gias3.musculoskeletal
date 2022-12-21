@@ -125,12 +125,12 @@ class PathPoint(object):
         self._isMovingPathPoint = False
 
         if p.getConcreteClassName() == "PathPoint":
-            self._osimPathPoint = opensim.PathPoint_safeDownCast(p)
+            self._osimPathPoint = opensim.PathPoint.safeDownCast(p)
         elif p.getConcreteClassName() == 'MovingPathPoint':
-            self._osimPathPoint = opensim.MovingPathPoint_safeDownCast(p)
+            self._osimPathPoint = opensim.MovingPathPoint.safeDownCast(p)
             self._isMovingPathPoint = True
         elif p.getConcreteClassName() == 'ConditionalPathPoint':
-            self._osimPathPoint = opensim.ConditionalPathPoint_safeDownCast(p)
+            self._osimPathPoint = opensim.ConditionalPathPoint.safeDownCast(p)
             self._isConditionalPathPoint = True
         else:
             self._osimPathPoint = p
@@ -192,7 +192,7 @@ class PathPoint(object):
         elif axis == 'z':
             func = self._osimPathPoint.getZFunction()
 
-        ss = opensim.SimmSpline_safeDownCast(func)
+        ss = opensim.SimmSpline.safeDownCast(func)
         if ss is None:
             raise TypeError('MovingPathPoint function not a simmspline, {} instead'.format(func.getConcreteClassName()))
 
@@ -433,7 +433,7 @@ class Joint(object):
 
     def __init__(self, j):
         if j.getConcreteClassName() == 'CustomJoint':
-            self._osimJoint = opensim.CustomJoint_safeDownCast(j)
+            self._osimJoint = opensim.CustomJoint.safeDownCast(j)
             self._isCustomJoint = True
 
         else:
@@ -494,7 +494,7 @@ class Joint(object):
             raise (ValueError('Unknown axis {}'.format(_method_name)))
 
         tfunc = _bound_methods[_method_name]().get_function()
-        ss = opensim.SimmSpline_safeDownCast(tfunc)
+        ss = opensim.SimmSpline.safeDownCast(tfunc)
         ss_x = np.array([ss.getX(i) for i in range(ss.getSize())])
         ss_y = np.array([ss.getY(i) for i in range(ss.getSize())])
         # Why aren't we doing the z-axis?
@@ -531,7 +531,7 @@ class Joint(object):
             raise (ValueError('Unknown axis {}'.format(_method_name)))
 
         tfunc = _bound_methods[_method_name]().get_function()
-        ss = opensim.SimmSpline_safeDownCast(tfunc)
+        ss = opensim.SimmSpline.safeDownCast(tfunc)
         ssLength = ss.getSize()
 
         if (len(x) != ssLength) or (len(y) != ssLength):
