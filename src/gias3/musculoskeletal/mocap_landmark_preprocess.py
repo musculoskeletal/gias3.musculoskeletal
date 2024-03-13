@@ -1,6 +1,6 @@
 """
 FILE: mocap_landmark_preprocess.py
-LAST MODIFIED: 24-12-2015 
+LAST MODIFIED: 13-03-2024
 DESCRIPTION: module for preprocessing mocap landmarks
 
 ===============================================================================
@@ -116,3 +116,75 @@ preprocessors = {
     'femur': preprocess_femur,
     'tibiafibula': preprocess_tibiafibula,
 }
+
+
+preprocessor_landmarks = {
+    'pelvis': [
+        [
+            'pelvis-LASIS',
+            'pelvis-RASIS',
+            'pelvis-LPSIS',
+            'pelvis-RPSIS',
+            'pelvis-Sacral'
+        ]
+    ],
+    'femur': [
+        [
+            'femur-LEC-l',
+            'femur-MEC-l'
+        ],
+        [
+            'femur-LEC-r',
+            'femur-MEC-r'
+        ]
+    ],
+    'tibiafibula': [
+        [
+            'tibiafibula-LM-l',
+            'tibiafibula-MM-l'
+        ],
+        [
+            'tibiafibula-LM-r',
+            'tibiafibula-MM-r'
+        ]
+    ]
+}
+
+
+def preprocess_landmarks(landmarks_coordinates, marker_radius=5.0, skin_padding=5.0):
+    """
+    Given a dictionary of landmark coordinates, adjust the coordinates of every landmark according to the `marker_radius` and `skin_padding`
+    values provided. The complete list of adjustable GIAS3 model landmarks is defined - per bone - by `preprocessor_landmarks`.
+
+    :param landmarks_coordinates: Dictionary where keys are GIAS3 model-landmark names and values are the measured coordinates of the
+        corresponding MoCap-landmarks.
+    :param marker_radius: MoCap marker radius to be accounted for with preprocessing.
+    :param skin_padding: Skip-padding value to be removed from measured MoCap landmark position.
+
+    :return: Dictionary containing a {landmark-name: adjusted-coordinates} pair for every landmark that has been successfully adjusted.
+        The landmark names are the GIAS3 model landmark names.
+    """
+    preprocessed_landmarks = {}
+
+    def _process(bone_name, model_landmarks):
+        preprocessor = preprocessors[bone_name]
+        coordinates = [landmarks_coordinates.get(landmark) for landmark in model_landmarks]
+
+        try:
+            adjusted_coordinates = preprocessor(marker_radius, skin_padding, *coordinates)
+        except InsufficientLandmarksError:
+            print(f'Insufficient landmarks for preprocessing {bone_name}')
+            return
+
+        adjusted_landmarks = {model_landmarks[i]: list(adjusted_coordinates[i]) for i in range(len(model_landmarks)) if
+                              adjusted_coordinates[i] is not None}
+        preprocessed_landmarks.update(adjusted_landmarks)
+
+    for bone in preprocessor_landmarks.keys():
+        for landmarks in preprocessor_landmarks[bone]:
+            _process(bone, landmarks)
+
+    # Sort landmarks.
+    preprocessed_landmarks = dict(sorted(preprocessed_landmarks.items()))
+
+    return preprocessed_landmarks
