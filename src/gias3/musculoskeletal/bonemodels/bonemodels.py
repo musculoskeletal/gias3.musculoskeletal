@@ -133,6 +133,14 @@ class PatellaModel(modelcore.BoneModel):
                         )
 
 
+VALID_MODEL_LANDMARKS = [
+    *PelvisModel.model_landmarks,
+    *[landmarks + side for landmarks in FemurModel.model_landmarks for side in ['-l', '-r']],
+    *[landmarks + side for landmarks in TibiaFibulaModel.model_landmarks for side in ['-l', '-r']],
+    *[landmarks + side for landmarks in PatellaModel.model_landmarks for side in ['-l', '-r']]
+]
+
+
 # ==================================================#
 # Multiple bone models                             #
 # ==================================================#
