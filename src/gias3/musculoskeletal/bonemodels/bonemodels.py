@@ -1,6 +1,6 @@
 """
 FILE: bonemodels.py
-LAST MODIFIED: 24-12-2015 
+LAST MODIFIED: 13-03-2024
 DESCRIPTION: Classes and functions for specific bone models
 
 ===============================================================================
@@ -15,6 +15,8 @@ from os import path
 
 import numpy as np
 from scipy.spatial import cKDTree
+
+import musculoskeletal.models as mm
 
 from gias3.common import transform3D, math
 from gias3.fieldwork.field import geometric_field
@@ -134,12 +136,9 @@ class PatellaModel(modelcore.BoneModel):
 # ==================================================#
 # Multiple bone models                             #
 # ==================================================#
-MAP_DIR = path.expanduser('~/work_projects/MAP/')
-
-
 class LowerLimbLeftAtlas(modelcore.MultiBoneAtlas):
     bone_names = ('pelvis', 'femur', 'patella', 'tibiafibula')
-    combined_pcs_filename = path.join(MAP_DIR, 'models/lower_limb/shapemodels/LLP26_rigid.pc')
+    combined_pcs_filename = mm.get_model_path("shape_models/LLP26_rigid.pc")
     bone_classes = {
         'pelvis': PelvisModel,
         'femur': FemurModel,
@@ -148,24 +147,24 @@ class LowerLimbLeftAtlas(modelcore.MultiBoneAtlas):
     }
     bone_files = {
         'pelvis': (
-            path.join(MAP_DIR, 'models/pelvis/template_meshes/pelvis_combined_cubic_mean_rigid_LLP26.geof'),
-            path.join(MAP_DIR, 'models/pelvis/template_meshes/pelvis_combined_cubic_flat.ens'),
-            path.join(MAP_DIR, 'models/pelvis/template_meshes/pelvis_combined_cubic_flat.mesh'),
+            mm.get_model_path('atlas_meshes/pelvis_combined_cubic_mean_rigid_LLP26.geof'),
+            mm.get_model_path('atlas_meshes/pelvis_combined_cubic_flat.ens'),
+            mm.get_model_path('atlas_meshes/pelvis_combined_cubic_flat.mesh'),
         ),
         'femur': (
-            path.join(MAP_DIR, 'models/femur/template_meshes/femur_left_mean_rigid_LLP26.geof'),
-            path.join(MAP_DIR, 'models/femur/template_meshes/femur_left_quartic_flat.ens'),
-            path.join(MAP_DIR, 'models/femur/template_meshes/femur_left_quartic_flat.mesh'),
+            mm.get_model_path('atlas_meshes/femur_left_mean_rigid_LLP26.geof'),
+            mm.get_model_path('atlas_meshes/femur_left_quartic_flat.ens'),
+            mm.get_model_path('atlas_meshes/femur_left_quartic_flat.mesh'),
         ),
         'patella': (
-            path.join(MAP_DIR, 'models/patella/template_meshes/patella_left_mean_rigid_LLP26.geof'),
-            path.join(MAP_DIR, 'models/patella/template_meshes/patella_11_left.ens'),
-            path.join(MAP_DIR, 'models/patella/template_meshes/patella_11_left.mesh'),
+            mm.get_model_path('atlas_meshes/patella_left_mean_rigid_LLP26.geof'),
+            mm.get_model_path('atlas_meshes/patella_11_left.ens'),
+            mm.get_model_path('atlas_meshes/patella_11_left.mesh'),
         ),
         'tibiafibula': (
-            path.join(MAP_DIR, 'models/tibiafibula/template_meshes/tibia_fibula_cubic_left_mean_rigid_LLP26.geof'),
-            path.join(MAP_DIR, 'models/tibiafibula/template_meshes/tibia_fibula_left_cubic_flat.ens'),
-            path.join(MAP_DIR, 'models/tibiafibula/template_meshes/tibia_fibula_left_cubic_flat.mesh'),
+            mm.get_model_path('atlas_meshes/tibia_fibula_cubic_left_mean_rigid_LLP26.geof'),
+            mm.get_model_path('atlas_meshes/tibia_fibula_left_cubic_flat.ens'),
+            mm.get_model_path('atlas_meshes/tibia_fibula_left_cubic_flat.mesh'),
         ),
     }
     combined_model_field_basis = {
@@ -704,27 +703,27 @@ class LowerLimbLeftAtlas(modelcore.MultiBoneAtlas):
 
 
 class LowerLimbRightAtlas(LowerLimbLeftAtlas):
-    combined_pcs_filename = '../models/lower_limb/shapemodels/LLP26_right_mirrored_from_left_rigid.pc'
+    combined_pcs_filename = mm.get_model_path("shape_models/LLP26_right_mirrored_from_left_rigid.pc")
     bone_files = {
         'pelvis': (
-            '../models/pelvis/template_meshes/pelvis_combined_cubic_mean_rigid_LLP26.geof',
-            '../models/pelvis/template_meshes/pelvis_combined_cubic_flat.ens',
-            '../models/pelvis/template_meshes/pelvis_combined_cubic_flat.mesh',
+            mm.get_model_path('atlas_meshes/pelvis_combined_cubic_mean_rigid_LLP26.geof'),
+            mm.get_model_path('atlas_meshes/pelvis_combined_cubic_flat.ens'),
+            mm.get_model_path('atlas_meshes/pelvis_combined_cubic_flat.mesh'),
         ),
         'femur': (
-            '../models/femur/template_meshes/femur_right_mirrored_from_left_mean_rigid_LLP26.geof',
-            '../models/femur/template_meshes/femur_right_quartic_flat.ens',
-            '../models/femur/template_meshes/femur_right_quartic_flat.mesh',
+            mm.get_model_path('atlas_meshes/femur_right_mirrored_from_left_mean_rigid_LLP26.geof'),
+            mm.get_model_path('atlas_meshes/femur_right_quartic_flat.ens'),
+            mm.get_model_path('atlas_meshes/femur_right_quartic_flat.mesh'),
         ),
         'patella': (
-            '../models/patella/template_meshes/patella_right_mirrored_from_left_mean_rigid_LLP26.geof',
-            '../models/patella/template_meshes/patella_11_right.ens',
-            '../models/patella/template_meshes/patella_11_right.mesh',
+            mm.get_model_path('atlas_meshes/patella_right_mirrored_from_left_mean_rigid_LLP26.geof'),
+            mm.get_model_path('atlas_meshes/patella_11_right.ens'),
+            mm.get_model_path('atlas_meshes/patella_11_right.mesh'),
         ),
         'tibiafibula': (
-            '../models/tibiafibula/template_meshes/tibia_fibula_cubic_right_mirrored_from_left_mean_rigid_LLP26.geof',
-            '../models/tibiafibula/template_meshes/tibia_fibula_right_cubic_flat.ens',
-            '../models/tibiafibula/template_meshes/tibia_fibula_right_cubic_flat.mesh',
+            mm.get_model_path('atlas_meshes/tibia_fibula_cubic_right_mirrored_from_left_mean_rigid_LLP26.geof'),
+            mm.get_model_path('atlas_meshes/tibia_fibula_right_cubic_flat.ens'),
+            mm.get_model_path('atlas_meshes/tibia_fibula_right_cubic_flat.mesh'),
         ),
     }
     HJC = 'pelvis-RHJC'
