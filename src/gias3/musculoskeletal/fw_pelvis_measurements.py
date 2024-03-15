@@ -126,7 +126,7 @@ class PelvisMeasurements(object):
         # unaligned landmarks
         landmarksUnaligned = {}
         for ln in self.landmarks:
-            e = fml.makeLandmarkEvaluator('pelvis-' + ln, self.GF)
+            e = fml.make_landmark_evaluator('pelvis-' + ln, self.GF)
             landmarksUnaligned[ln] = e(self.GF.field_parameters)
 
         self.measurements['landmarks_unaligned'] = Measurement(
@@ -137,7 +137,7 @@ class PelvisMeasurements(object):
         # aligned landmarks
         landmarksACS = {}
         for ln in self.landmarks:
-            e = fml.makeLandmarkEvaluator('pelvis-' + ln, self.GFACS)
+            e = fml.make_landmark_evaluator('pelvis-' + ln, self.GFACS)
             landmarksACS[ln] = e(self.GFACS.field_parameters)
 
         self.measurements['landmarks_ACS'] = Measurement(
@@ -180,13 +180,13 @@ class PelvisMeasurements(object):
 
     def calcAcetabulumDiameters(self):
 
-        lhjcEval = fml.makeLandmarkEvaluator('pelvis-LHJC', self.GF, radius=True)
+        lhjcEval = fml.make_landmark_evaluator('pelvis-LHJC', self.GF, radius=True)
         lhjcCenter, lhjcRadius = lhjcEval(self.GF.field_parameters)
         LAm = Measurement('left_acetabulum_diameter', lhjcRadius * 2.0)
         LAm.centre = numpy.array([lhjcCenter])
         self.measurements['left_acetabulum_diameter'] = LAm
 
-        rhjcEval = fml.makeLandmarkEvaluator('pelvis-RHJC', self.GF, radius=True)
+        rhjcEval = fml.make_landmark_evaluator('pelvis-RHJC', self.GF, radius=True)
         rhjcCenter, rhjcRadius = rhjcEval(self.GF.field_parameters)
         RAm = Measurement('right_acetabulum_diameter', rhjcRadius * 2.0)
         RAm.centre = numpy.array([rhjcCenter])
@@ -244,7 +244,7 @@ class PelvisMeasurements(object):
             raise ValueError('Unknown ACS {}'.format(self.acs))
 
         # left
-        # lhjcEval = fml.makeLandmarkEvaluator('pelvis-LHJC', self.GFACS)
+        # lhjcEval = fml.make_landmark_evaluator('pelvis-LHJC', self.GFACS)
         # lhjcCenter = lhjcEval(self.GFACS.field_parameters)
         # LHJC = numpy.array([lhjcCenter])
 
@@ -316,10 +316,10 @@ class PelvisMeasurements(object):
         """
         Calculate HJC from sphere fit to mesh
         """
-        lhjcEval = fml.makeLandmarkEvaluator('pelvis-LHJC', self.GFACS, radius=True)
+        lhjcEval = fml.make_landmark_evaluator('pelvis-LHJC', self.GFACS, radius=True)
         lhjcCenter, lhjcRadius = lhjcEval(self.GFACS.field_parameters)
 
-        rhjcEval = fml.makeLandmarkEvaluator('pelvis-RHJC', self.GFACS, radius=True)
+        rhjcEval = fml.make_landmark_evaluator('pelvis-RHJC', self.GFACS, radius=True)
         rhjcCenter, rhjcRadius = rhjcEval(self.GFACS.field_parameters)
 
         return lhjcCenter, rhjcCenter

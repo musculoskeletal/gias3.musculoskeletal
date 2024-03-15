@@ -276,11 +276,11 @@ class BoneModel(object):
         self.landmarks = {}
         for ln in landmark_names:
             if side is None:
-                self._landmark_evaluators[ln] = model_landmarks.makeLandmarkEvaluator(
+                self._landmark_evaluators[ln] = model_landmarks.make_landmark_evaluator(
                     ln, self.gf
                 )
             else:
-                self._landmark_evaluators[ln] = model_landmarks.makeLandmarkEvaluator(
+                self._landmark_evaluators[ln] = model_landmarks.make_landmark_evaluator(
                     ln, self.gf, side=side
                 )
         self.update_landmarks()

@@ -161,7 +161,7 @@ def alignModelLandmarksLinScale(gf, landmarks, weights=1.0,
     ldObjs = []
     for ldName, ldTarg in landmarks:
         targetLandmarks.append(ldTarg)
-        evaluator = fw_model_landmarks.makeLandmarkEvaluator(
+        evaluator = fw_model_landmarks.make_landmark_evaluator(
             ldName, sourceGF
         )
         ldObjs.append(_makeLandmarkObj(ldTarg, evaluator))
@@ -259,7 +259,7 @@ def alignModelLandmarksPC(gf, landmarks, pc, pcs, weights=1.0,
     ldObjs = []
     for ldName, ldTarg in landmarks:
         targetLandmarks.append(ldTarg)
-        evaluator = fw_model_landmarks.makeLandmarkEvaluator(ldName, sourceGF)
+        evaluator = fw_model_landmarks.make_landmark_evaluator(ldName, sourceGF)
         ldObjs.append(_makeLandmarkObj(ldTarg, evaluator))
 
     def obj(P):
@@ -418,7 +418,7 @@ def alignFemurLandmarksRigidScale(gf, landmarks, t0=None, r0=None, s0=None):
     for ldName, ldTarg in landmarks:
         if ldName is 'FHC':
             ldName = 'HC'
-        evaluator = fw_model_landmarks.makeLandmarkEvaluator('femur-' + ldName, gf)
+        evaluator = fw_model_landmarks.make_landmark_evaluator('femur-' + ldName, gf)
         sourceLandmarks.append(evaluator(gf.get_field_parameters()))
         targetLandmarks.append(ldTarg)
 
@@ -733,14 +733,16 @@ def alignAnatomicLH(X, LASIS, LPSIS, FHC):
 #                     }
 
 pelvisLandmarkNodes = {
-    'lasis': fw_model_landmarks._pelvisLASISNode,
-    'rasis': fw_model_landmarks._pelvisRASISNode,
-    'lpsis': fw_model_landmarks._pelvisLPSISNode,
-    'rpsis': fw_model_landmarks._pelvisRPSISNode,
-    'lpt': fw_model_landmarks._pelvisLPTNode,
-    'rpt': fw_model_landmarks._pelvisRPTNode,
+    'lasis': fw_model_landmarks.PELVIS_LASIS_NODE,
+    'rasis': fw_model_landmarks.PELVIS_RASIS_NODE,
+    'lpsis': fw_model_landmarks.PELVIS_LPSIS_NODE,
+    'rpsis': fw_model_landmarks.PELVIS_RPSIS_NODE,
+    'lpt': fw_model_landmarks.PELVIS_LPT_NODE,
+    'rpt': fw_model_landmarks.PELVIS_RPT_NODE,
 }
 
+# TODO: These values are NOT the left-hemi nodes.
+#   Nor do they align with the left combined-pelvis nodes.
 LHLandmarkNodes = {
     'lasis': 466,
     'lpsis': 384,
@@ -832,7 +834,7 @@ def alignPelvisLandmarksPC(gf, pc, landmarks, weights=1.0, gf_params_callback=No
     ldObjs = []
     for ldName, ldTarg in landmarks:
         targetLandmarks.append(ldTarg)
-        evaluator = fw_model_landmarks.makeLandmarkEvaluator('pelvis-' + ldName, sourceGF)
+        evaluator = fw_model_landmarks.make_landmark_evaluator('pelvis-' + ldName, sourceGF)
         ldObjs.append(_makeLandmarkObj(ldTarg, evaluator))
 
     def obj(P):
@@ -969,7 +971,7 @@ def alignTibiaFibulaLandmarksPC(gf, pc, landmarks, weights=1.0, gf_params_callba
     ldObjs = []
     for ldName, ldTarg in landmarks:
         targetLandmarks.append(ldTarg)
-        evaluator = fw_model_landmarks.makeLandmarkEvaluator('tibiafibula-' + ldName, sourceGF)
+        evaluator = fw_model_landmarks.make_landmark_evaluator('tibiafibula-' + ldName, sourceGF)
         ldObjs.append(_makeLandmarkObj(ldTarg, evaluator))
 
     def obj(P):
