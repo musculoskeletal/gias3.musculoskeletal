@@ -416,7 +416,7 @@ def alignFemurLandmarksRigidScale(gf, landmarks, t0=None, r0=None, s0=None):
     targetLandmarks = []
     sourceLandmarks = []
     for ldName, ldTarg in landmarks:
-        if ldName is 'FHC':
+        if ldName == 'FHC':
             ldName = 'HC'
         evaluator = fw_model_landmarks.make_landmark_evaluator('femur-' + ldName, gf)
         sourceLandmarks.append(evaluator(gf.get_field_parameters()))
