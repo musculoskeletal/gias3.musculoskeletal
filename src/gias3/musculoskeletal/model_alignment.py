@@ -915,6 +915,27 @@ def createTibiaFibulaACSISB(MM, LM, MC, LC, side='left'):
     return IM, x, y, z
 
 
+def createTibiaFibulaACSISB_2(MM, LM, MC, LC, side='left'):
+    """Axes: x-anterior, y-superior, z-right. Calcaneus CS
+    """
+
+    IC = (MC + LC) / 2.0
+    IM = (MM + LM) / 2.0  # origin
+
+    # superiorly, IM to IC
+    z = normaliseVector(MC - LC)
+    n1 = normaliseVector(numpy.cross(normaliseVector(MC-IM), normaliseVector(LC-IM)))
+    if side == 'right':
+        z *= -1.0
+        n1 *= -1.0
+
+    y = normaliseVector(numpy.cross(n1, z))
+    x = normaliseVector(numpy.cross(y, z))
+    #print('tib:', z.dot(x), y.dot(z), x.dot(y))
+
+    return IM, x, y, z
+
+
 def createTibiaFibulaACSOpenSim(MM, LM, MC, LC, side='left'):
     """Axes: x-anterior, y-superior, z-right. Calcaneus CS
     """
