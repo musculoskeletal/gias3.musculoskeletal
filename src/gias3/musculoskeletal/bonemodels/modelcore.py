@@ -4,7 +4,7 @@ LAST MODIFIED: 24-12-2015
 DESCRIPTION: Core functions and classes for bone models
 
 ===============================================================================
-This file is part of GIAS2. (https://bitbucket.org/jangle/gias2)
+This file is part of GIAS3. (https://github.com/musculoskeletal/gias3)
 
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -276,11 +276,11 @@ class BoneModel(object):
         self.landmarks = {}
         for ln in landmark_names:
             if side is None:
-                self._landmark_evaluators[ln] = model_landmarks.makeLandmarkEvaluator(
+                self._landmark_evaluators[ln] = model_landmarks.make_landmark_evaluator(
                     ln, self.gf
                 )
             else:
-                self._landmark_evaluators[ln] = model_landmarks.makeLandmarkEvaluator(
+                self._landmark_evaluators[ln] = model_landmarks.make_landmark_evaluator(
                     ln, self.gf, side=side
                 )
         self.update_landmarks()

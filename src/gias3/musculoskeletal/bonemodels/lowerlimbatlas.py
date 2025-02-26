@@ -1,10 +1,10 @@
 """
 FILE: lowerlimbatlas.py
-LAST MODIFIED: 24-12-2015 
+LAST MODIFIED: 14-03-2024
 DESCRIPTION: Classes and functions for the lowerlimb atlas model
 
 ===============================================================================
-This file is part of GIAS2. (https://bitbucket.org/jangle/gias2)
+This file is part of GIAS3. (https://github.com/musculoskeletal/gias3)
 
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -15,6 +15,11 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import numpy as np
 
 from gias3.musculoskeletal.bonemodels.bonemodels import LowerLimbLeftAtlas, LowerLimbRightAtlas
+from gias3.musculoskeletal.fw_model_landmarks import PELVIS_LEFT_HEMI_ELEMENTS, PELVIS_RIGHT_HEMI_ELEMENTS, PELVIS_SACRUM_ELEMENTS, \
+    TIBIA_ELEMENTS, FIBULA_ELEMENTS
+
+
+BASIS_TYPES = LowerLimbLeftAtlas.combined_model_field_basis
 
 
 def _trim_angle(a):
@@ -306,6 +311,76 @@ class LowerLimbAtlas(object):
 
         # use the left pelvis as the reference
         self.models['pelvis'] = self.ll_l.models['pelvis']
+
+    def model_gf_dict(self):
+        model_gf_dict = dict([(m[0], m[1].gf) for m in list(self.models.items())])
+
+        # Add pelvis sub-meshes.
+        left_hemi_gf, sacrum_gf, right_hemi_gf = self._split_pelvis_gfs()
+        model_gf_dict['hemipelvis-left'] = left_hemi_gf
+        model_gf_dict['sacrum'] = sacrum_gf
+        model_gf_dict['hemipelvis-right'] = right_hemi_gf
+
+        # Add separate tibia and fibula meshes.
+        tibia_gf_left, fibula_gf_left, tibia_gf_right, fibula_gf_right = self._split_tibia_fibula_gfs()
+        model_gf_dict['tibia-l'] = tibia_gf_left
+        model_gf_dict['fibula-l'] = fibula_gf_left
+        model_gf_dict['tibia-r'] = tibia_gf_right
+        model_gf_dict['fibula-r'] = fibula_gf_right
+
+        return model_gf_dict
+
+    def _split_pelvis_gfs(self):
+        """
+        Given a flattened pelvis model, create left hemi, sacrum, and right hemi meshes.
+        """
+        pelvis = self.models['pelvis'].gf
+        left_hemi = pelvis.makeGFFromElements(
+            'hemipelvis-left',
+            PELVIS_LEFT_HEMI_ELEMENTS,
+            BASIS_TYPES
+        )
+        sacrum = pelvis.makeGFFromElements(
+            'sacrum',
+            PELVIS_SACRUM_ELEMENTS,
+            BASIS_TYPES
+        )
+        right_hemi = pelvis.makeGFFromElements(
+            'hemipelvis-right',
+            PELVIS_RIGHT_HEMI_ELEMENTS,
+            BASIS_TYPES
+        )
+        return left_hemi, sacrum, right_hemi
+
+    def _split_tibia_fibula_gfs(self):
+        """
+        Given combined tibia-fibula models, create separate tibia and fibula meshes.
+        """
+        tibia_fibula_left = self.models['tibiafibula-l'].gf
+        tibia_left = tibia_fibula_left.makeGFFromElements(
+            'tibia-l',
+            TIBIA_ELEMENTS,
+            BASIS_TYPES
+        )
+        fibula_left = tibia_fibula_left.makeGFFromElements(
+            'fibula-l',
+            FIBULA_ELEMENTS,
+            BASIS_TYPES,
+        )
+
+        tibia_fibula_right = self.models['tibiafibula-r'].gf
+        tib_right = tibia_fibula_right.makeGFFromElements(
+            'tibia-r',
+            TIBIA_ELEMENTS,
+            BASIS_TYPES,
+        )
+        fibula_right = tibia_fibula_right.makeGFFromElements(
+            'fibula-r',
+            FIBULA_ELEMENTS,
+            BASIS_TYPES,
+        )
+
+        return tibia_left, fibula_left, tib_right, fibula_right
 
     # def load_models_left(self, *args, **kwargs):
     #     self.ll_l.load_models(*args, **kwargs)

@@ -4,7 +4,7 @@ LAST MODIFIED: 24-12-2015
 DESCRIPTION: functions for alignining fieldwork models of individual bones
 
 ===============================================================================
-This file is part of GIAS2. (https://bitbucket.org/jangle/gias2)
+This file is part of GIAS3. (https://github.com/musculoskeletal/gias3)
 
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -161,7 +161,7 @@ def alignModelLandmarksLinScale(gf, landmarks, weights=1.0,
     ldObjs = []
     for ldName, ldTarg in landmarks:
         targetLandmarks.append(ldTarg)
-        evaluator = fw_model_landmarks.makeLandmarkEvaluator(
+        evaluator = fw_model_landmarks.make_landmark_evaluator(
             ldName, sourceGF
         )
         ldObjs.append(_makeLandmarkObj(ldTarg, evaluator))
@@ -259,7 +259,7 @@ def alignModelLandmarksPC(gf, landmarks, pc, pcs, weights=1.0,
     ldObjs = []
     for ldName, ldTarg in landmarks:
         targetLandmarks.append(ldTarg)
-        evaluator = fw_model_landmarks.makeLandmarkEvaluator(ldName, sourceGF)
+        evaluator = fw_model_landmarks.make_landmark_evaluator(ldName, sourceGF)
         ldObjs.append(_makeLandmarkObj(ldTarg, evaluator))
 
     def obj(P):
@@ -416,9 +416,9 @@ def alignFemurLandmarksRigidScale(gf, landmarks, t0=None, r0=None, s0=None):
     targetLandmarks = []
     sourceLandmarks = []
     for ldName, ldTarg in landmarks:
-        if ldName is 'FHC':
+        if ldName == 'FHC':
             ldName = 'HC'
-        evaluator = fw_model_landmarks.makeLandmarkEvaluator('femur-' + ldName, gf)
+        evaluator = fw_model_landmarks.make_landmark_evaluator('femur-' + ldName, gf)
         sourceLandmarks.append(evaluator(gf.get_field_parameters()))
         targetLandmarks.append(ldTarg)
 
@@ -733,14 +733,16 @@ def alignAnatomicLH(X, LASIS, LPSIS, FHC):
 #                     }
 
 pelvisLandmarkNodes = {
-    'lasis': fw_model_landmarks._pelvisLASISNode,
-    'rasis': fw_model_landmarks._pelvisRASISNode,
-    'lpsis': fw_model_landmarks._pelvisLPSISNode,
-    'rpsis': fw_model_landmarks._pelvisRPSISNode,
-    'lpt': fw_model_landmarks._pelvisLPTNode,
-    'rpt': fw_model_landmarks._pelvisRPTNode,
+    'lasis': fw_model_landmarks.PELVIS_LASIS_NODE,
+    'rasis': fw_model_landmarks.PELVIS_RASIS_NODE,
+    'lpsis': fw_model_landmarks.PELVIS_LPSIS_NODE,
+    'rpsis': fw_model_landmarks.PELVIS_RPSIS_NODE,
+    'lpt': fw_model_landmarks.PELVIS_LPT_NODE,
+    'rpt': fw_model_landmarks.PELVIS_RPT_NODE,
 }
 
+# TODO: These values are NOT the left-hemi nodes.
+#   Nor do they align with the left combined-pelvis nodes.
 LHLandmarkNodes = {
     'lasis': 466,
     'lpsis': 384,
@@ -832,7 +834,7 @@ def alignPelvisLandmarksPC(gf, pc, landmarks, weights=1.0, gf_params_callback=No
     ldObjs = []
     for ldName, ldTarg in landmarks:
         targetLandmarks.append(ldTarg)
-        evaluator = fw_model_landmarks.makeLandmarkEvaluator('pelvis-' + ldName, sourceGF)
+        evaluator = fw_model_landmarks.make_landmark_evaluator('pelvis-' + ldName, sourceGF)
         ldObjs.append(_makeLandmarkObj(ldTarg, evaluator))
 
     def obj(P):
@@ -913,6 +915,27 @@ def createTibiaFibulaACSISB(MM, LM, MC, LC, side='left'):
     return IM, x, y, z
 
 
+def createTibiaFibulaACSISB_2(MM, LM, MC, LC, side='left'):
+    """Axes: x-anterior, y-superior, z-right. Calcaneus CS
+    """
+
+    IC = (MC + LC) / 2.0
+    IM = (MM + LM) / 2.0  # origin
+
+    # superiorly, IM to IC
+    z = normaliseVector(MC - LC)
+    n1 = normaliseVector(numpy.cross(normaliseVector(MC-IM), normaliseVector(LC-IM)))
+    if side == 'right':
+        z *= -1.0
+        n1 *= -1.0
+
+    y = normaliseVector(numpy.cross(n1, z))
+    x = normaliseVector(numpy.cross(y, z))
+    #print('tib:', z.dot(x), y.dot(z), x.dot(y))
+
+    return IM, x, y, z
+
+
 def createTibiaFibulaACSOpenSim(MM, LM, MC, LC, side='left'):
     """Axes: x-anterior, y-superior, z-right. Calcaneus CS
     """
@@ -969,7 +992,7 @@ def alignTibiaFibulaLandmarksPC(gf, pc, landmarks, weights=1.0, gf_params_callba
     ldObjs = []
     for ldName, ldTarg in landmarks:
         targetLandmarks.append(ldTarg)
-        evaluator = fw_model_landmarks.makeLandmarkEvaluator('tibiafibula-' + ldName, sourceGF)
+        evaluator = fw_model_landmarks.make_landmark_evaluator('tibiafibula-' + ldName, sourceGF)
         ldObjs.append(_makeLandmarkObj(ldTarg, evaluator))
 
     def obj(P):

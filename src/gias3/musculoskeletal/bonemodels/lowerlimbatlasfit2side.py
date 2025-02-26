@@ -5,7 +5,7 @@ DESCRIPTION: Functions for 2-side lower limb atlas landmark registration using
 PCA fitting
 
 ===============================================================================
-This file is part of GIAS2. (https://bitbucket.org/jangle/gias2)
+This file is part of GIAS3. (https://github.com/musculoskeletal/gias3)
 
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -265,7 +265,7 @@ def fit(ll_model, target_landmark_coords, landmark_names,
     ll_model: LowerLimbAtlas instance
     target_landmark_coords [m*3 array]: coordinates of m landmarks
     landmark_names [list of strings]: names of landmarks suffixed with 'l' or
-        'r'. Refer to gias2.musculoskeletal.fw_model_landmarks
+        'r'. Refer to gias3.musculoskeletal.fw_model_landmarks
     pc_modes [list of ints]: the principal components to use in the fitting.
         If list is nested, fits will be successively carried out using
         the modes defined in each nested list, and the fitted parameters in

@@ -6,7 +6,7 @@ functions and classes for taking anthropometric measurements from
 the fieldwork femur model
 
 ===============================================================================
-This file is part of GIAS2. (https://bitbucket.org/jangle/gias2)
+This file is part of GIAS3. (https://github.com/musculoskeletal/gias3)
 
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -112,18 +112,19 @@ class FemurMeasurements(object):
         'epicondylar_width': None,
     }
 
-    headElems = fml._femurHeadElems
-    shaftElems = fml._femurShaftElems
-    neckElems = fml._femurNeckElems
-    neckLongElems = fml._femurNeckLongElems
-    subtrochanterNodes = fml._femurSubtrochanterNodes
-    midshaftNodes = fml._femurMidShaftNodes
-    epiCondylarMCondElems = fml._femurMedialEpicondyleElems
-    epiCondylarLCondElems = fml._femurLateralEpicondyleElems
-    condyleAlignmentNodes = fml._femurCondyleAlignmentNodes
-    gTrocElems = fml._femurGreaterTrochanterElems
-    mCondElems = fml._femurMedialCondyleElems
-    lCondElems = fml._femurLateralCondyleElems
+    subtrochanterNodes = fml.FEMUR_SUB_TROCHANTER_NODES
+    midshaftNodes = fml.FEMUR_MID_SHAFT_NODES
+    condyleAlignmentNodes = fml.FEMUR_CONDYLE_ALIGNMENT_NODES
+
+    headElems = fml.FEMUR_HEAD_ELEMENTS
+    shaftElems = fml.FEMUR_SHAFT_ELEMENTS
+    neckElems = fml.FEMUR_NECK_ELEMENTS
+    neckLongElems = fml.FEMUR_NECK_LONG_ELEMENTS
+    epiCondylarMCondElems = fml.FEMUR_MEDIAL_EPICONDYLE_ELEMENTS
+    epiCondylarLCondElems = fml.FEMUR_LATERAL_EPICONDYLE_ELEMENTS
+    gTrocElems = fml.FEMUR_GREATER_TROCHANTER_ELEMENTS
+    mCondElems = fml.FEMUR_MEDIAL_CONDYLE_ELEMENTS
+    lCondElems = fml.FEMUR_LATERAL_CONDYLE_ELEMENTS
 
     epD = [20, 20]
 
