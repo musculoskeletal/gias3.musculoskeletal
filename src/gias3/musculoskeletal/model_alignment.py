@@ -616,7 +616,7 @@ def createPelvisACSISB(lasis, rasis, lpsis, rpsis):
     axes: x-anterior, y-superior, z-right
     """
     oa = (lasis + rasis) / 2.0
-    op = (lpsis + lpsis) / 2.0
+    op = (lpsis + rpsis) / 2.0
     # right
     z = normaliseVector(rasis - lasis)
     # anterior, in plane of op, rasis, lasis
